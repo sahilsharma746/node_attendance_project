@@ -25,6 +25,7 @@ const Register = () => {
     setError('');
   };
 
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');

@@ -63,7 +63,7 @@ const Attendance = () => {
     <div className="attendance-container">
       <div className="attendance-header">
         <div className="header-left">
-          <h1 className="attendance-title">Here is Your Attendance Record</h1>
+          <h1 className="attendance-title">Your Attendance Record</h1>
           <p className="attendance-subtitle">Manage check-ins and view history</p>
         </div>
       </div>
