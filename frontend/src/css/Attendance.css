@@ -1,0 +1,220 @@
+.attendance-container {
+  flex: 1;
+  padding: 32px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.attendance-header {
+  margin-bottom: 32px;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.attendance-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.attendance-subtitle {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.attendance-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.current-day-card {
+  background-color: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.clock-icon-image {
+  width: 40px;
+  height: 40px;
+
+}
+
+.date-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.current-date {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.status-message {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.card-right {
+  display: flex;
+  gap: 12px;
+}
+
+.check-in-btn {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.check-in-btn:hover:not(.disabled) {
+  background-color: #059669;
+}
+
+.check-in-btn.disabled {
+  background-color: #d1d5db;
+  cursor: not-allowed;
+}
+
+.check-out-btn {
+  background-color: white;
+  color: #1f2937;
+  border: 2px solid #e5e7eb;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.check-out-btn:hover:not(.disabled) {
+  border-color: #9ca3af;
+  background-color: #f9fafb;
+}
+
+.check-out-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.attendance-history-card {
+  background-color: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.history-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.history-icon-image {
+  color: #6b7280;
+  width: 30px;
+  height: 30px;
+
+}
+
+.history-table-container {
+  overflow-x: auto;
+}
+
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.attendance-table thead {
+  background-color: #f9fafb;
+}
+
+.attendance-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.attendance-table td {
+  padding: 16px;
+  font-size: 14px;
+  color: #1f2937;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.attendance-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.empty-table-cell {
+  text-align: center;
+  padding: 60px 16px !important;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background-color: #d1fae5;
+  color: #065f46;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .attendance-container {
+    padding: 20px;
+  }
+
+  .attendance-title {
+    font-size: 24px;
+  }
+
+  .current-day-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .card-right {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .check-in-btn,
+  .check-out-btn {
+    width: 100%;
+  }
+}
+

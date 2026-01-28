@@ -1,0 +1,48 @@
+.main-content {
+  flex: 1;
+  padding: 32px;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+}
+
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+}
+
+.header-left {
+  flex: 1;
+}
+
+.greeting {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.tagline {
+  font-size: 16px;
+  color: #4b5563;
+  margin: 0;
+  font-weight: 400;
+}
+
+.header-right {
+  text-align: right;
+}
+
+.date-label {
+  font-size: 14px;
+  color: #9ca3af;
+  margin: 0 0 4px 0;
+}
+
+.date-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
