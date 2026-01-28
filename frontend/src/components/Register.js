@@ -25,7 +25,7 @@ const Register = () => {
     setError('');
   };
 
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -104,7 +104,6 @@ const Register = () => {
               onChange={handleChange}
               className="role-select"
             >
-              <option value="user">User</option>
               <option value="employee">Employee</option>
               <option value="admin">Admin</option>
             </select>

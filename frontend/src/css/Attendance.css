@@ -80,7 +80,7 @@
 }
 
 .check-in-btn {
-  background-color: #10b981;
+  background-color: #FE5C63;
   color: white;
   border: none;
   padding: 12px 24px;
@@ -92,11 +92,11 @@
 }
 
 .check-in-btn:hover:not(.disabled) {
-  background-color: #059669;
+  background-color: #FD5B63;
 }
 
 .check-in-btn.disabled {
-  background-color: #d1d5db;
+  background-color: #FE5C63;
   cursor: not-allowed;
 }
 

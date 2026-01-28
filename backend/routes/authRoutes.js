@@ -120,4 +120,17 @@ router.get("/me", auth, async (req, res) => {
   }
 });
 
+router.get("/users", auth, async (req, res) => {
+  try {
+    const users = await User.find().select("-password");
+    res.json(users);
+  } catch (error) {
+    console.error("Get users error:", error);
+    res.status(500).json({ 
+      msg: "Server error",
+      error: error.message 
+    });
+  }
+});
+
 module.exports = router;

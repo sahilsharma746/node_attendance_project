@@ -33,7 +33,7 @@
 }
 
 .new-request-btn {
-  background-color: #3b82f6;
+  background-color: #FE5C63;
   color: white;
   border: none;
   padding: 12px 24px;
@@ -45,7 +45,7 @@
 }
 
 .new-request-btn:hover {
-  background-color: #2563eb;
+  background-color: #FD5B63;
 }
 
 .leave-request-container .summary-cards {
