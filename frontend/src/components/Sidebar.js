@@ -83,9 +83,6 @@ const Sidebar = () => {
       </nav>
 
       <div className="sidebar-footer">
-        <div className="theme-toggle">
-          <img src="/images/moon.png" alt="Theme" className="theme-icon" />
-        </div>
         <div className="user-profile">
           <div className="user-avatar">{getInitials(user?.name)}</div>
           <div className="user-info">
