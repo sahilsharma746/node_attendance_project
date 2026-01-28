@@ -22,6 +22,7 @@ const AdminPanel = () => {
         >
           <img src="/images/request-for-proposal.png" alt="Leave Requests" className="admin-nav-tab-icon" />
           <span>Leave Requests</span>
+          
         </NavLink>
         <NavLink 
           to="/dashboard/admin-panel/attendance" 
