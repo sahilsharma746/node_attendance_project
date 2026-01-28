@@ -1,0 +1,107 @@
+.admin-leave-requests {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.leave-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  border-left: 6px solid;
+}
+
+.pending-card {
+  border-left-color: #f59e0b;
+}
+
+.approved-card {
+  border-left-color: #10b981;
+}
+
+.rejected-card {
+  border-left-color: #ef4444;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pending-icon {
+  background-color: #f59e0b;
+}
+
+.approved-icon {
+  background-color: #10b981;
+}
+
+.rejected-icon {
+  background-color: #ef4444;
+}
+
+.card-title-section {
+  flex: 1;
+}
+
+.card-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+}
+
+.card-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.card-content {
+  padding: 40px 24px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.empty-icon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-text {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.card-icon-image{
+  width: 25px;
+  height: 25px;
+}
+.empty-icon-image{
+  width: 40px;
+  height: 40px;
+}

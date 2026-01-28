@@ -1,0 +1,76 @@
+.admin-panel-container {
+  flex: 1;
+  padding: 40px;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+}
+
+.admin-header {
+  margin-bottom: 32px;
+}
+
+.admin-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.admin-subtitle {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.admin-nav-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 32px;
+  background-color: white;
+  padding: 4px;
+  border-radius: 8px;
+  width: fit-content;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.admin-nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  background-color: transparent;
+  white-space: nowrap;
+}
+
+.admin-nav-tab svg {
+  width: 20px;
+  height: 20px;
+}
+
+.admin-nav-tab:hover {
+  color: #374151;
+  background-color: #f9fafb;
+}
+
+.admin-nav-tab.active {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.admin-nav-tab.active svg {
+  stroke: white;
+}
+
+.admin-content {
+  width: 100%;
+}
+.admin-nav-tab-icon{
+  width: 20px;
+  height: 20px;
+}

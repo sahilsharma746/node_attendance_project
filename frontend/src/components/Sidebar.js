@@ -42,11 +42,11 @@ const Sidebar = () => {
           <span>Updates</span>
         </NavLink>
         <NavLink 
-          to="/organization" 
+          to="/organizations" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
         >
           <img src="/images/business.png" alt="Organization" className="nav-icon" />
-          <span>Organization</span>
+          <span>Organizations</span>
           </NavLink>
         <NavLink 
           to="/admin-panel" 

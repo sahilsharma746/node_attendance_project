@@ -1,0 +1,24 @@
+.organizations-container {
+  flex: 1;
+  padding: 32px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.organizations-header {
+  margin-bottom: 32px;
+}
+
+.organizations-title {
+  font-size: 32px;
+  font-weight: 700; 
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.organizations-subtitle {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+}
+
