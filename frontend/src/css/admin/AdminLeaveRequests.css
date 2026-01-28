@@ -42,17 +42,6 @@
   flex-shrink: 0;
 }
 
-.pending-icon {
-  background-color: #f59e0b;
-}
-
-.approved-icon {
-  background-color: #10b981;
-}
-
-.rejected-icon {
-  background-color: #ef4444;
-}
 
 .card-title-section {
   flex: 1;
@@ -72,7 +61,7 @@
 }
 
 .card-content {
-  padding: 40px 24px;
+  padding: 10px 24px;
 }
 
 .empty-state {
