@@ -6,8 +6,14 @@ import LeaveRequest from './LeaveRequest';
 import Updates from './Updates';
 import Organizations from './Organizations';
 import AdminPanel from './AdminPanel';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import '../css/Dashboard.css';
+
+const AdminRoute = ({ children }) => {
+  const { isAdmin } = useAuth();
+  return isAdmin() ? children : <Navigate to="/dashboard" replace />;
+};
 
 const Dashboard = () => {
   return (
@@ -19,7 +25,14 @@ const Dashboard = () => {
         <Route path="leave-request" element={<LeaveRequest />} />
         <Route path="updates" element={<Updates />} />
         <Route path="organizations" element={<Organizations />} />
-        <Route path="admin-panel/*" element={<AdminPanel />} />
+        <Route 
+          path="admin-panel/*" 
+          element={
+            <AdminRoute>
+              <AdminPanel />
+            </AdminRoute>
+          } 
+        />
       </Routes>
     </div>
   );

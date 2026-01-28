@@ -15,7 +15,7 @@ const AdminEmployees = () => {
               <tr>
                 <th>Name</th>
                 <th>Role</th>
-                <th>Leave Balance</th>
+                <th>Casual Leave</th>
                 <th>Status</th>
               </tr>
             </thead>

@@ -17,35 +17,35 @@ const AdminPanel = () => {
 
       <div className="admin-nav-tabs">
         <NavLink 
-          to="/admin-panel/leave-requests" 
+          to="/dashboard/admin-panel/leave-requests" 
           className={({ isActive }) => `admin-nav-tab ${isActive ? 'active' : ''}`}
         >
           <img src="/images/request-for-proposal.png" alt="Leave Requests" className="admin-nav-tab-icon" />
           <span>Leave Requests</span>
         </NavLink>
         <NavLink 
-          to="/admin-panel/attendance" 
+          to="/dashboard/admin-panel/attendance" 
           className={({ isActive }) => `admin-nav-tab ${isActive ? 'active' : ''}`}
         >
           <img src="/images/attendance.png" alt="Attendance" className="admin-nav-tab-icon" />
           <span>Attendance</span>
         </NavLink>
         <NavLink 
-          to="/admin-panel/employees" 
+          to="/dashboard/admin-panel/employees" 
           className={({ isActive }) => `admin-nav-tab ${isActive ? 'active' : ''}`}
         >
         <img src="/images/employee.png" alt="Employees" className="admin-nav-tab-icon" />
           <span>Employees</span>
         </NavLink>
         <NavLink 
-          to="/admin-panel/holidays" 
+          to="/dashboard/admin-panel/holidays" 
           className={({ isActive }) => `admin-nav-tab ${isActive ? 'active' : ''}`}
         >
          <img src="/images/holiday.png" alt="Holidays" className="admin-nav-tab-icon" />
           <span>Holidays</span>
         </NavLink>
         <NavLink 
-          to="/admin-panel/notifications" 
+          to="/dashboard/admin-panel/notifications" 
           className={({ isActive }) => `admin-nav-tab ${isActive ? 'active' : ''}`}
         >
           <img src="/images/notification.png" alt="Notifications" className="admin-nav-tab-icon" />

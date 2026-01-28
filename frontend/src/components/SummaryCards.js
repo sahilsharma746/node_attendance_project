@@ -31,7 +31,7 @@ const SummaryCards = () => {
          <img src="/images/leave.png" alt="Leave Balance" />
         </div>
         <div className="card-content">
-          <div className="card-label">Leave Balance</div>
+          <div className="card-label">Casual Leave</div>
           <div className="card-value">24</div>
         </div>
       </div>
