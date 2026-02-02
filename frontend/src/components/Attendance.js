@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { getAttendanceStatus } from '../utils/attendanceCalculator';
 import '../css/Attendance.css';
 
 const API_BASE = 'http://localhost:3002/api/attendance';
@@ -120,7 +121,10 @@ const Attendance = () => {
               <div className="current-date">{getCurrentDate()}</div>
               <div className="status-message">
                 {checkedIn
-                  ? `Checked in at ${formatTime(checkInTime)}`
+                  ? (() => {
+                      const status = getAttendanceStatus(checkInTime, null);
+                      return `${formatTime(checkInTime)} — ${status.statusMessage}`;
+                    })()
                   : "You haven't checked in yet today"}
               </div>
             </div>

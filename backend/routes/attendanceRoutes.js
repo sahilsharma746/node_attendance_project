@@ -4,6 +4,7 @@ const auth = require("../middleware/auth");
 const authModule = require("../middleware/auth");
 const adminAuth = authModule.adminAuth || authModule;
 const Attendance = require("../models/Attendance");
+const { getAttendanceStatus } = require("../utils/attendanceCalculator");
 
 async function adminRecordsHandler(req, res) {
   try {
@@ -20,16 +21,25 @@ async function adminRecordsHandler(req, res) {
       .sort({ date: -1 })
       .limit(500)
       .lean();
-    const formatted = records.map((r) => ({
-      _id: r._id,
-      user: r.user ? { name: r.user.name, email: r.user.email } : null,
-      date: formatDisplayDate(r.date),
-      checkIn: formatTime(r.checkIn),
-      checkOut: r.checkOut ? formatTime(r.checkOut) : "",
-      status: getDisplayStatus(r),
-      lateBy: "-",
-      breaks: "-",
-    }));
+    const formatted = records.map((r) => {
+      const attendanceStatus = getAttendanceStatus(r.checkIn, r.checkOut);
+      return {
+        _id: r._id,
+        user: r.user ? { name: r.user.name, email: r.user.email } : null,
+        date: formatDisplayDate(r.date),
+        checkIn: formatTime(r.checkIn),
+        checkOut: r.checkOut ? formatTime(r.checkOut) : "",
+        status: attendanceStatus.statusMessage,
+        lateBy:
+          attendanceStatus.lateMinutes > 0
+            ? `${attendanceStatus.lateMinutes} min`
+            : "-",
+        breaks: "-",
+        isLate: attendanceStatus.isLate,
+        lateMinutes: attendanceStatus.lateMinutes,
+        totalWorkMinutes: attendanceStatus.totalWorkMinutes,
+      };
+    });
     res.json(formatted);
   } catch (error) {
     console.error("Admin attendance records error:", error);
@@ -47,13 +57,20 @@ router.get("/history", auth, async (req, res) => {
       .limit(100)
       .lean();
 
-    const formatted = records.map((r) => ({
-      id: r._id,
-      date: formatDisplayDate(r.date),
-      checkIn: formatTime(r.checkIn),
-      checkOut: r.checkOut ? formatTime(r.checkOut) : "",
-      status: getDisplayStatus(r),
-    }));
+    const formatted = records.map((r) => {
+      const attendanceStatus = getAttendanceStatus(r.checkIn, r.checkOut);
+      return {
+        id: r._id,
+        date: formatDisplayDate(r.date),
+        checkIn: formatTime(r.checkIn),
+        checkOut: r.checkOut ? formatTime(r.checkOut) : "",
+        status: attendanceStatus.statusMessage,
+        isLate: attendanceStatus.isLate,
+        lateMinutes: attendanceStatus.lateMinutes,
+        totalWorkMinutes: attendanceStatus.totalWorkMinutes,
+      };
+    });
+
 
     res.json(formatted);
   } catch (error) {
@@ -183,12 +200,16 @@ function getDisplayStatus(r) {
 
 function formatRecord(r) {
   const d = r.date;
+  const attendanceStatus = getAttendanceStatus(r.checkIn, r.checkOut);
   return {
     id: r._id,
     date: formatDisplayDate(d),
     checkIn: formatTime(r.checkIn),
     checkOut: r.checkOut ? formatTime(r.checkOut) : "",
-    status: getDisplayStatus(r),
+    status: attendanceStatus.statusMessage,
+    isLate: attendanceStatus.isLate,
+    lateMinutes: attendanceStatus.lateMinutes,
+    totalWorkMinutes: attendanceStatus.totalWorkMinutes,
   };
 }
 

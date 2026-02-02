@@ -4,6 +4,7 @@ import '../../css/admin/AdminAttendance.css';
 
 const API_BASE = 'http://localhost:3002/api/attendance';
 
+
 const AdminAttendance = () => {
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [loading, setLoading] = useState(true);
