@@ -12,7 +12,6 @@ const Sidebar = () => {
     logout();
     navigate('/login');
   };
-
   const getInitials = (name) => {
     if (!name) return 'U';
     return name

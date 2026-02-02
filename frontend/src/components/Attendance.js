@@ -26,10 +26,10 @@ const Attendance = () => {
   };
 
   const formatTime = (date) => {
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
       minute: '2-digit',
-      hour12: true 
+      hour12: true,
     });
   };
 
@@ -43,15 +43,15 @@ const Attendance = () => {
     if (checkInTime) {
       const checkOutTime = new Date();
       const newRecord = {
-        date: checkInTime.toLocaleDateString('en-US', { 
-          weekday: 'long', 
-          year: 'numeric', 
-          month: 'long', 
-          day: 'numeric' 
+        date: checkInTime.toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
         }),
         checkIn: formatTime(checkInTime),
         checkOut: formatTime(checkOutTime),
-        status: 'Present'
+        status: 'Present',
       };
       setAttendanceHistory([newRecord, ...attendanceHistory]);
       setCheckedIn(false);
@@ -77,21 +77,21 @@ const Attendance = () => {
             <div className="date-info">
               <div className="current-date">{getCurrentDate()}</div>
               <div className="status-message">
-                {checkedIn 
-                  ? `Checked in at ${formatTime(checkInTime)}` 
+                {checkedIn
+                  ? `Checked in at ${formatTime(checkInTime)}`
                   : "You haven't checked in yet today"}
               </div>
             </div>
           </div>
           <div className="card-right">
-            <button 
+            <button
               className={`check-in-btn ${checkedIn ? 'disabled' : ''}`}
               onClick={handleCheckIn}
               disabled={checkedIn}
             >
               Check In
             </button>
-            <button 
+            <button
               className={`check-out-btn ${!checkedIn ? 'disabled' : ''}`}
               onClick={handleCheckOut}
               disabled={!checkedIn}
