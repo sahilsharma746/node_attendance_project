@@ -76,7 +76,20 @@
 
 .card-right {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 12px;
+}
+
+.attendance-message {
+  width: 100%;
+  font-size: 13px;
+  color: #059669;
+  margin-bottom: 4px;
+}
+
+.attendance-message.error {
+  color: #dc2626;
 }
 
 .check-in-btn {

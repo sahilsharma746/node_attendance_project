@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, NavLink } from 'react-router-dom';
+import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import AdminLeaveRequests from './admin/AdminLeaveRequests';
 import AdminAttendance from './admin/AdminAttendance';
 import AdminEmployees from './admin/AdminEmployees';
@@ -8,6 +8,9 @@ import AdminNotifications from './admin/AdminNotifications';
 import '../css/AdminPanel.css';
 
 const AdminPanel = () => {
+  const location = useLocation();
+  const isAdminPanelIndex = location.pathname === '/dashboard/admin-panel' || location.pathname === '/dashboard/admin-panel/';
+
   return (
     <div className="admin-panel-container">
       <div className="admin-header">
@@ -18,7 +21,7 @@ const AdminPanel = () => {
       <div className="admin-nav-tabs">
         <NavLink 
           to="/dashboard/admin-panel/leave-requests" 
-          className={({ isActive }) => `admin-nav-tab ${isActive ? 'active' : ''}`}
+          className={({ isActive }) => `admin-nav-tab ${isActive || isAdminPanelIndex ? 'active' : ''}`}
         >
           <img src="/images/request-for-proposal.png" alt="Leave Requests" className="admin-nav-tab-icon" />
           <span>Leave Requests</span>
@@ -53,6 +56,7 @@ const AdminPanel = () => {
           <span>Notifications</span>
         </NavLink>
       </div>
+
 
       <div className="admin-content">
         <Routes>

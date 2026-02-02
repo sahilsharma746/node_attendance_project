@@ -1,21 +1,55 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import '../../css/admin/AdminAttendance.css';
 
+const API_BASE = 'http://localhost:3002/api/attendance';
+
 const AdminAttendance = () => {
+  const [attendanceRecords, setAttendanceRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filterUser, setFilterUser] = useState('');
+  const [filterMonth, setFilterMonth] = useState(String(new Date().getMonth() + 1));
+  const [filterYear, setFilterYear] = useState(String(new Date().getFullYear()));
+
+  const fetchRecords = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (filterUser) params.set('user', filterUser);
+      params.set('month', filterMonth);
+      params.set('year', filterYear);
+      const res = await axios.get(`${API_BASE}/records?${params.toString()}`);
+      setAttendanceRecords(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error('Failed to fetch attendance records:', err);
+      setAttendanceRecords([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [filterUser, filterMonth, filterYear]);
+
+  useEffect(() => {
+    fetchRecords();
+  }, [fetchRecords]);
+
   return (
     <div className="admin-attendance">
       <div className="attendance-card">
         <div className="card-header-section">
           <h2 className="section-title">Attendance Records</h2>
           <div className="filters">
-            <select className="filter-select">
-              <option>All Users</option>
+            <select className="filter-select" value={filterUser} onChange={(e) => setFilterUser(e.target.value)}>
+              <option value="">All Users</option>
             </select>
-            <select className="filter-select">
-              <option>January</option>
+            <select className="filter-select" value={filterMonth} onChange={(e) => setFilterMonth(e.target.value)}>
+              {[1,2,3,4,5,6,7,8,9,10,11,12].map((m) => (
+                <option key={m} value={m}>{new Date(2000, m - 1).toLocaleString('default', { month: 'long' })}</option>
+              ))}
             </select>
-            <select className="filter-select">
-              <option>2026</option>
+            <select className="filter-select" value={filterYear} onChange={(e) => setFilterYear(e.target.value)}>
+              {[2026, 2025, 2024].map((y) => (
+                <option key={y} value={y}>{y}</option>
+              ))}
             </select>
           </div>
         </div>
@@ -33,24 +67,27 @@ const AdminAttendance = () => {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>
-                  {/* <div className="employee-cell">
-                    <div className="avatar">
-                      <span></span>
-                    </div>
-                    <span></span>
-                  </div> */}
-                </td>
-                <td></td>
-                <td></td>
-                <td>-</td>
-                <td>
-                  {/* <span className="status-badge late">LATE</span> */}
-                </td>
-                <td className="late-text"></td>
-                <td></td>
-              </tr>
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="loading-cell">Loading...</td>
+                </tr>
+              ) : attendanceRecords.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="empty-cell">No attendance records for this period</td>
+                </tr>
+              ) : (
+                attendanceRecords.map((attendance) => (
+                  <tr key={attendance._id || attendance.date}>
+                    <td>{attendance.user ? attendance.user.name : '-'}</td>
+                    <td>{attendance.date}</td>
+                    <td>{attendance.checkIn}</td>
+                    <td>{attendance.checkOut || '-'}</td>
+                    <td>{attendance.status}</td>
+                    <td>{attendance.lateBy ?? '-'}</td>
+                    <td>{attendance.breaks ?? '-'}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
