@@ -3,17 +3,33 @@ import axios from 'axios';
 import '../../css/admin/AdminAttendance.css';
 
 const API_BASE = 'http://localhost:3002/api/attendance';
+const AUTH_BASE = 'http://localhost:3002/api/auth';
 
+function timeToInput(dateStrOrDate) {
+  if (!dateStrOrDate) return '';
+  const d = new Date(dateStrOrDate);
+  if (Number.isNaN(d.getTime())) return '';
+  const h = d.getHours();
+  const m = d.getMinutes();
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
 
 const AdminAttendance = () => {
   const [attendanceRecords, setAttendanceRecords] = useState([]);
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterUser, setFilterUser] = useState('');
   const [filterMonth, setFilterMonth] = useState(String(new Date().getMonth() + 1));
   const [filterYear, setFilterYear] = useState(String(new Date().getFullYear()));
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingRecord, setEditingRecord] = useState(null);
+  const [editForm, setEditForm] = useState({ checkInTime: '', checkOutTime: '' });
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const fetchRecords = useCallback(async () => {
     setLoading(true);
+    setError('');
     try {
       const params = new URLSearchParams();
       if (filterUser) params.set('user', filterUser);
@@ -23,15 +39,73 @@ const AdminAttendance = () => {
       setAttendanceRecords(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error('Failed to fetch attendance records:', err);
+      setError(err.response?.data?.msg || 'Failed to load records');
       setAttendanceRecords([]);
     } finally {
       setLoading(false);
     }
   }, [filterUser, filterMonth, filterYear]);
 
+  const fetchUsers = useCallback(async () => {
+    try {
+      const res = await axios.get(`${AUTH_BASE}/users`);
+      setUsers(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error('Failed to fetch users:', err);
+    }
+  }, []);
+
   useEffect(() => {
     fetchRecords();
   }, [fetchRecords]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  const openEdit = (record) => {
+    const dateStr = record.dateStr || (record.date && new Date(record.date).toISOString().slice(0, 10));
+    if (!dateStr) return;
+    setEditingRecord(record);
+    setEditForm({
+      checkInTime: timeToInput(record.checkInRaw || record.checkIn),
+      checkOutTime: timeToInput(record.checkOutRaw || record.checkOut) || '',
+    });
+    setEditModalOpen(true);
+    setError('');
+  };
+
+  const closeEditModal = () => {
+    setEditModalOpen(false);
+    setEditingRecord(null);
+    setEditForm({ checkInTime: '', checkOutTime: '' });
+    setError('');
+  };
+
+  const handleUpdateAttendance = async (e) => {
+    e.preventDefault();
+    if (!editingRecord?.dateStr || !editForm.checkInTime) {
+      setError('Date and check-in time are required.');
+      return;
+    }
+    setUpdateLoading(true);
+    setError('');
+    try {
+      const dateStr = editingRecord.dateStr;
+      const checkIn = `${dateStr}T${editForm.checkInTime}:00`;
+      const checkOut = editForm.checkOutTime ? `${dateStr}T${editForm.checkOutTime}:00` : null;
+      await axios.patch(`${API_BASE}/records/${editingRecord._id}`, {
+        checkIn,
+        checkOut,
+      });
+      closeEditModal();
+      fetchRecords();
+    } catch (err) {
+      setError(err.response?.data?.msg || 'Failed to update record');
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
 
   return (
     <div className="admin-attendance">
@@ -41,6 +115,9 @@ const AdminAttendance = () => {
           <div className="filters">
             <select className="filter-select" value={filterUser} onChange={(e) => setFilterUser(e.target.value)}>
               <option value="">All Users</option>
+              {users.map((u) => (
+                <option key={u._id} value={u._id}>{u.name || u.email}</option>
+              ))}
             </select>
             <select className="filter-select" value={filterMonth} onChange={(e) => setFilterMonth(e.target.value)}>
               {[1,2,3,4,5,6,7,8,9,10,11,12].map((m) => (
@@ -54,6 +131,7 @@ const AdminAttendance = () => {
             </select>
           </div>
         </div>
+        {error && !editModalOpen && <div className="attendance-error">{error}</div>}
         <div className="table-container">
           <table className="attendance-table">
             <thead>
@@ -65,16 +143,17 @@ const AdminAttendance = () => {
                 <th>Status</th>
                 <th>Late By</th>
                 <th>Breaks</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="loading-cell">Loading...</td>
+                  <td colSpan={8} className="loading-cell">Loading...</td>
                 </tr>
               ) : attendanceRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="empty-cell">No attendance records for this period</td>
+                  <td colSpan={8} className="empty-cell">No attendance records for this period</td>
                 </tr>
               ) : (
                 attendanceRecords.map((attendance) => (
@@ -86,6 +165,15 @@ const AdminAttendance = () => {
                     <td>{attendance.status}</td>
                     <td>{attendance.lateBy ?? '-'}</td>
                     <td>{attendance.breaks ?? '-'}</td>
+                    <td>
+                      <button
+                        type="button"
+                        className="attendance-edit-btn"
+                        onClick={() => openEdit(attendance)}
+                      >
+                        Edit
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}
@@ -93,6 +181,47 @@ const AdminAttendance = () => {
           </table>
         </div>
       </div>
+
+      {editModalOpen && editingRecord && (
+        <div className="attendance-modal-overlay" onClick={closeEditModal}>
+          <div className="attendance-modal" onClick={(e) => e.stopPropagation()}>
+            <h3 className="attendance-modal-title">Edit Attendance</h3>
+            <p className="attendance-modal-subtitle">
+              {editingRecord.user?.name} · {editingRecord.date}
+            </p>
+            {error && <div className="attendance-error">{error}</div>}
+            <form onSubmit={handleUpdateAttendance} className="attendance-edit-form">
+              <div className="form-group">
+                <label htmlFor="edit-check-in">Check In (time)</label>
+                <input
+                  id="edit-check-in"
+                  type="time"
+                  value={editForm.checkInTime}
+                  onChange={(e) => setEditForm((f) => ({ ...f, checkInTime: e.target.value }))}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="edit-check-out">Check Out (time, optional)</label>
+                <input
+                  id="edit-check-out"
+                  type="time"
+                  value={editForm.checkOutTime}
+                  onChange={(e) => setEditForm((f) => ({ ...f, checkOutTime: e.target.value }))}
+                />
+              </div>
+              <div className="attendance-modal-actions">
+                <button type="button" className="attendance-btn-cancel" onClick={closeEditModal}>
+                  Cancel
+                </button>
+                <button type="submit" className="attendance-btn-save" disabled={updateLoading}>
+                  {updateLoading ? 'Saving...' : 'Save'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <div className="attendance-card">
         <div className="card-header-section">

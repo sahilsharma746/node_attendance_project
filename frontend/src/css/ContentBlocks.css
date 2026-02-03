@@ -140,6 +140,80 @@
   color: #6b7280;
 }
 
+/* Updates list */
+.updates-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.update-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  border-left: 3px solid #3b82f6;
+}
+
+.update-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.update-content {
+  font-size: 13px;
+  color: #4b5563;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.update-meta {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Holidays list */
+.holidays-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.holiday-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  background-color: #f0fdf4;
+  border-radius: 8px;
+  border-left: 3px solid #22c55e;
+}
+
+.holiday-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.holiday-date {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.holiday-desc {
+  font-size: 12px;
+  color: #4b5563;
+}
+
 @media (max-width: 1200px) {
   .content-blocks {
     grid-template-columns: 1fr;

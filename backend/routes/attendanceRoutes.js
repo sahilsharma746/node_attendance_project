@@ -28,8 +28,11 @@ async function adminRecordsHandler(req, res) {
         _id: r._id,
         user: r.user ? { name: r.user.name, email: r.user.email } : null,
         date: formatDisplayDate(r.date),
+        dateStr: new Date(r.date).toISOString().slice(0, 10),
         checkIn: formatTime(r.checkIn),
         checkOut: r.checkOut ? formatTime(r.checkOut) : "",
+        checkInRaw: r.checkIn,
+        checkOutRaw: r.checkOut,
         status: attendanceStatus.statusMessage,
         lateBy: attendanceStatus.lateByFormatted ?? "-",
         breaks: "-",
@@ -47,6 +50,59 @@ async function adminRecordsHandler(req, res) {
 
 router.get("/admin/records", adminAuth, adminRecordsHandler);
 router.get("/records", adminAuth, adminRecordsHandler);
+
+router.patch("/records/:id", adminAuth, async (req, res) => {
+  try {
+    const { checkIn, checkOut } = req.body;
+    const record = await Attendance.findById(req.params.id);
+    if (!record) {
+      return res.status(404).json({ msg: "Attendance record not found" });
+    }
+    if (checkIn !== undefined) {
+      const d = new Date(checkIn);
+      if (Number.isNaN(d.getTime())) {
+        return res.status(400).json({ msg: "Invalid check-in date" });
+      }
+      record.checkIn = d;
+    }
+    if (checkOut !== undefined) {
+      if (checkOut === null || checkOut === "") {
+        record.checkOut = null;
+      } else {
+        const d = new Date(checkOut);
+        if (Number.isNaN(d.getTime())) {
+          return res.status(400).json({ msg: "Invalid check-out date" });
+        }
+        record.checkOut = d;
+      }
+    }
+    record.status = record.checkOut ? "Out" : "Present";
+    await record.save();
+    const populated = await Attendance.findById(record._id)
+      .populate("user", "name email")
+      .lean();
+    const attendanceStatus = getAttendanceStatus(populated.checkIn, populated.checkOut);
+    res.json({
+      _id: populated._id,
+      user: populated.user ? { name: populated.user.name, email: populated.user.email } : null,
+      date: formatDisplayDate(populated.date),
+      checkIn: formatTime(populated.checkIn),
+      checkOut: populated.checkOut ? formatTime(populated.checkOut) : "",
+      status: attendanceStatus.statusMessage,
+      lateBy: attendanceStatus.lateByFormatted ?? "-",
+      breaks: "-",
+      isLate: attendanceStatus.isLate,
+      lateMinutes: attendanceStatus.lateMinutes,
+      totalWorkMinutes: attendanceStatus.totalWorkMinutes,
+    });
+  } catch (error) {
+    if (error.name === "CastError") {
+      return res.status(400).json({ msg: "Invalid record id" });
+    }
+    console.error("Update attendance error:", error);
+    res.status(500).json({ msg: "Failed to update attendance record" });
+  }
+});
 
 router.get("/history", auth, async (req, res) => {
   try {
