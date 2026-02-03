@@ -34,7 +34,6 @@ function formatLeave(leave, includeUser = false) {
   return out;
 }
 
-
 router.post("/", auth, async (req, res) => {
   try {
     const userId = req.user.id || req.user._id;
@@ -125,6 +124,29 @@ router.get("/my/stats", auth, async (req, res) => {
   } catch (error) {
     console.error("Leave stats error:", error);
     res.status(500).json({ msg: "Failed to fetch leave stats" });
+  }
+});
+
+router.get("/on-leave-today", auth, async (req, res) => {
+  try {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
+    const leaves = await Leave.find({
+      status: "approved",
+      startDate: { $lte: endOfToday },
+      endDate: { $gte: startOfToday },
+    })
+      .populate("user", "name email")
+      .sort({ startDate: 1 })
+      .lean();
+
+    const formatted = leaves.map((l) => formatLeave(l, true));
+    res.json(formatted);
+  } catch (error) {
+    console.error("On leave today error:", error);
+    res.status(500).json({ msg: "Failed to fetch team on leave" });
   }
 });
 
