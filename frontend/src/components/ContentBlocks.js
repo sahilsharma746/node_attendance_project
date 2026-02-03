@@ -37,6 +37,8 @@ const ContentBlocks = () => {
         <div className="content-block">
           <div className="block-header">
             <h3>Today's Status</h3>
+            
+             
           </div>
           <div className="block-content">
             <div className="status-display">

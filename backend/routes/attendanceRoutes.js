@@ -31,10 +31,7 @@ async function adminRecordsHandler(req, res) {
         checkIn: formatTime(r.checkIn),
         checkOut: r.checkOut ? formatTime(r.checkOut) : "",
         status: attendanceStatus.statusMessage,
-        lateBy:
-          attendanceStatus.lateMinutes > 0
-            ? `${attendanceStatus.lateMinutes} min`
-            : "-",
+        lateBy: attendanceStatus.lateByFormatted ?? "-",
         breaks: "-",
         isLate: attendanceStatus.isLate,
         lateMinutes: attendanceStatus.lateMinutes,
