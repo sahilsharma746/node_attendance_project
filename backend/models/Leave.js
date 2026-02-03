@@ -9,7 +9,7 @@ const leaveSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["casual", "sick", "annual", "unpaid", "other"],
+      enum: ["casual", "sick", "emergency", "other"],
       default: "casual",
     },
     startDate: {
@@ -45,7 +45,6 @@ const leaveSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
 
 leaveSchema.pre("save", function () {
   if (this.endDate < this.startDate) {

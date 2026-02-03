@@ -7,7 +7,7 @@ const API_BASE = 'http://localhost:3002/api/leave';
 const LEAVE_TYPES = [
   { value: 'casual', label: 'Casual Leave' },
   { value: 'sick', label: 'Sick Leave' },
-  { value: 'annual', label: 'Emergency Leave' },
+  { value: 'emergency', label: 'Emergency Leave' },
   { value: 'other', label: 'Other' },
 ];
 
