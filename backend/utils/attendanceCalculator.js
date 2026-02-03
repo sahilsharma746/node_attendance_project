@@ -1,43 +1,20 @@
-/**
- * Attendance calculation utilities.
- * Business rules:
- * - Office start: 10:00 AM (on the same calendar day as check-in).
- * - Required work per day: 9 hours.
- * - Late = check-in after 10:00 AM; waived if total work >= 9 hours in the same day.
- */
+const OFFICE_START_HOUR = 16;
+const OFFICE_START_MINUTE = 15;
+const REQUIRED_WORK_MINUTES = 9 * 60; 
 
-const OFFICE_START_HOUR = 10;
-const OFFICE_START_MINUTE = 0;
-const REQUIRED_WORK_MINUTES = 9 * 60; // 9 hours
-
-/**
- * Normalize a value to a Date (handles Date, ISO string, or timestamp).
- * @param {Date|string|number} value
- * @returns {Date|null}
- */
 function toDate(value) {
   if (value == null) return null;
   const d = new Date(value);
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
-/**
- * Get office start time (10:00 AM) on the same calendar day as the given date.
- * @param {Date} date
- * @returns {Date}
- */
+
 function getOfficeStartForDate(date) {
   const d = new Date(date);
   d.setHours(OFFICE_START_HOUR, OFFICE_START_MINUTE, 0, 0);
   return d;
 }
 
-/**
- * Minutes between two dates (safe; returns 0 if invalid).
- * @param {Date} start
- * @param {Date} end
- * @returns {number}
- */
 function minutesBetween(start, end) {
   if (!start || !end) return 0;
   const s = toDate(start);
@@ -47,18 +24,15 @@ function minutesBetween(start, end) {
   return Math.max(0, Math.round(ms / (60 * 1000)));
 }
 
-/**
- * Compute attendance status from check-in and optional check-out.
- *
- * @param {Date|string|number|null} checkIn - Check-in time
- * @param {Date|string|number|null} checkOut - Check-out time (optional)
- * @returns {{
- *   isLate: boolean,
- *   lateMinutes: number,
- *   totalWorkMinutes: number,
- *   statusMessage: string
- * }}
- */
+function formatMinutesToHours(minutes) {
+  if (!minutes || minutes <= 0) return "0 min";
+  const hrs = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hrs > 0 && mins > 0) return `${hrs} hr ${mins} min`;
+  if (hrs > 0) return `${hrs} hr`;
+  return `${mins} min`;
+}
+
 function getAttendanceStatus(checkIn, checkOut) {
   const cin = toDate(checkIn);
   const cout = toDate(checkOut);
@@ -72,6 +46,7 @@ function getAttendanceStatus(checkIn, checkOut) {
       lateMinutes: 0,
       totalWorkMinutes: 0,
       statusMessage: "No check-in recorded",
+      lateByFormatted: null,
     };
   }
 
@@ -87,23 +62,25 @@ function getAttendanceStatus(checkIn, checkOut) {
       totalWorkMinutes: 0,
       statusMessage:
         lateMinutes > 0
-          ? `Checked in ${lateMinutes} min late (no check-out yet)`
+          ? `Checked in ${formatMinutesToHours(lateMinutes)} late (no check-out yet)`
           : "Checked in on time (no check-out yet)",
+      lateByFormatted: lateMinutes > 0 ? formatMinutesToHours(lateMinutes) : null,
     };
   }
 
   const totalWorkMinutes = minutesBetween(cin, cout);
 
-  // Waiver: if total work >= 9 hours in the same day, late is waived
+
   const lateWaived = totalWorkMinutes >= REQUIRED_WORK_MINUTES;
   const lateMinutes = lateWaived ? 0 : isAfterOfficeStart ? rawLateMinutes : 0;
   const isLate = lateMinutes > 0;
+  const lateByFormatted = lateMinutes > 0 ? formatMinutesToHours(lateMinutes) : null;
 
   let statusMessage;
   if (lateWaived && isAfterOfficeStart) {
     statusMessage = "Present (late waived – 9+ hours worked)";
   } else if (isLate) {
-    statusMessage = `Late by ${lateMinutes} min`;
+    statusMessage = `Late by ${lateByFormatted}`;
   } else {
     statusMessage = "On time";
   }
@@ -113,6 +90,7 @@ function getAttendanceStatus(checkIn, checkOut) {
     lateMinutes,
     totalWorkMinutes,
     statusMessage,
+    lateByFormatted,
   };
 }
 
