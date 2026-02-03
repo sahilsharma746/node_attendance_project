@@ -169,3 +169,132 @@
   color: #6b7280;
   font-size: 14px;
 }
+
+.attendance-error {
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: #fef2f2;
+  color: #dc2626;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.attendance-edit-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: #eff6ff;
+  color: #2563eb;
+  transition: background-color 0.2s;
+}
+
+.attendance-edit-btn:hover {
+  background: #dbeafe;
+}
+
+/* Edit attendance modal */
+.attendance-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.attendance-modal {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.attendance-modal-title {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.attendance-modal-subtitle {
+  margin: 0 0 20px 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.attendance-edit-form .form-group {
+  margin-bottom: 16px;
+}
+
+.attendance-edit-form label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.attendance-edit-form input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #1f2937;
+  box-sizing: border-box;
+}
+
+.attendance-edit-form input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.attendance-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.attendance-btn-cancel {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.attendance-btn-cancel:hover {
+  background: #e5e7eb;
+}
+
+.attendance-btn-save {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: #FE5C63;
+  color: white;
+}
+
+.attendance-btn-save:hover:not(:disabled) {
+  background: #FD5B63;
+}
+
+.attendance-btn-save:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

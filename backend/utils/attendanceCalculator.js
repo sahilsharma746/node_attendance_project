@@ -94,6 +94,7 @@ function getAttendanceStatus(checkIn, checkOut) {
   };
 }
 
+
 module.exports = {
   getAttendanceStatus,
   getOfficeStartForDate,

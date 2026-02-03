@@ -4,7 +4,7 @@ import AdminLeaveRequests from './admin/AdminLeaveRequests';
 import AdminAttendance from './admin/AdminAttendance';
 import AdminEmployees from './admin/AdminEmployees';
 import AdminHolidays from './admin/AdminHolidays';
-import AdminNotifications from './admin/AdminNotifications';
+import AdminUpdates from './admin/AdminUpdates';
 import '../css/AdminPanel.css';
 
 const AdminPanel = () => {
@@ -49,11 +49,11 @@ const AdminPanel = () => {
           <span>Holidays</span>
         </NavLink>
         <NavLink 
-          to="/dashboard/admin-panel/notifications" 
+          to="/dashboard/admin-panel/updates" 
           className={({ isActive }) => `admin-nav-tab ${isActive ? 'active' : ''}`}
         >
-          <img src="/images/notification.png" alt="Notifications" className="admin-nav-tab-icon" />
-          <span>Notifications</span>
+          <img src="/images/updated.png" alt="Updates" className="admin-nav-tab-icon" />
+          <span>Updates</span>
         </NavLink>
       </div>
 
@@ -65,7 +65,7 @@ const AdminPanel = () => {
           <Route path="attendance" element={<AdminAttendance />} />
           <Route path="employees" element={<AdminEmployees />} />
           <Route path="holidays" element={<AdminHolidays />} />
-          <Route path="notifications" element={<AdminNotifications />} />
+          <Route path="updates" element={<AdminUpdates />} />
         </Routes>
       </div>
     </div>
