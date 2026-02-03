@@ -12,6 +12,7 @@ connectDB();
 
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/attendance", require("./routes/attendanceRoutes"));
+app.use("/api/leave", require("./routes/leaveRoutes"));
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", message: "Server is running" });

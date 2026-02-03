@@ -86,11 +86,162 @@
   margin: 0;
 }
 
-.card-icon-image{
+.card-icon-image {
   width: 25px;
   height: 25px;
 }
-.empty-icon-image{
+
+.empty-icon-image {
   width: 40px;
   height: 40px;
+}
+
+.admin-leave-loading,
+.admin-leave-error {
+  padding: 24px;
+  text-align: center;
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.admin-leave-error {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.admin-leave-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-leave-item {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.admin-leave-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.admin-leave-user {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.admin-leave-status {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.admin-leave-status-pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.admin-leave-status-approved {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.admin-leave-status-rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.admin-leave-dates {
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+.admin-leave-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.admin-leave-type {
+  text-transform: capitalize;
+}
+
+.admin-leave-reason,
+.admin-leave-admin-note {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 8px;
+}
+
+.admin-leave-admin-note {
+  font-style: italic;
+  color: #b91c1c;
+}
+
+.admin-leave-actions {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-leave-note-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.admin-leave-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-leave-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-leave-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-leave-btn-approve {
+  background: #10b981;
+  color: white;
+}
+
+.admin-leave-btn-approve:hover:not(:disabled) {
+  background: #059669;
+}
+
+.admin-leave-btn-reject {
+  background: #ef4444;
+  color: white;
+}
+
+.admin-leave-btn-reject:hover:not(:disabled) {
+  background: #dc2626;
 }

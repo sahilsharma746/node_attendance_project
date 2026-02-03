@@ -11,7 +11,6 @@ export function toDate(value) {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
-
 export function getOfficeStartForDate(date) {
   const d = new Date(date);
   d.setHours(OFFICE_START_HOUR, OFFICE_START_MINUTE, 0, 0);

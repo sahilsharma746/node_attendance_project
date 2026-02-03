@@ -6,6 +6,7 @@ const adminAuth = authModule.adminAuth || authModule;
 const Attendance = require("../models/Attendance");
 const { getAttendanceStatus } = require("../utils/attendanceCalculator");
 
+
 async function adminRecordsHandler(req, res) {
   try {
     const { user: userId, month, year } = req.query;
@@ -193,7 +194,6 @@ function formatDisplayDate(date) {
   });
 }
 
-// Always show "Present" when checked in, "Out" when checked out (handles old "Checked In" records)
 function getDisplayStatus(r) {
   return r.checkOut ? "Out" : "Present";
 }
