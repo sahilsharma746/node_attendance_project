@@ -120,15 +120,20 @@ router.get("/me", auth, async (req, res) => {
   }
 });
 
-router.get("/users", auth, adminAuth, async (req, res) => {
+// List users: any authenticated user (admin = full list, employee = id/name/role only)
+router.get("/users", auth, async (req, res) => {
   try {
-    const users = await User.find().select("-password");
+    const isAdmin = req.user && req.user.role === "admin";
+    const users = await User.find()
+      .select(isAdmin ? "-password" : "_id name role")
+      .sort({ name: 1 })
+      .lean();
     res.json(users);
   } catch (error) {
     console.error("Get users error:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       msg: "Server error",
-      error: error.message 
+      error: error.message,
     });
   }
 });

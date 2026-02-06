@@ -144,14 +144,35 @@ const ContentBlocks = () => {
         <div className="content-block">
           <div className="block-header">
             <h3>
-              <img src="/images/clock.png" alt="Employees on Break" className="block-header-icon" />
-              Employees on Break
+              <img src="/images/team.png" alt="Team Members on Leave" className="block-header-icon" />
+              Team Members on Leave
             </h3>
           </div>
           <div className="block-content">
-            <div className="empty-state">
-              <p>No employees currently on break</p>
-            </div>
+            {onLeaveLoading ? (
+              <div className="empty-state">
+                <p>Loading...</p>
+              </div>
+            ) : onLeaveError ? (
+              <div className="empty-state on-leave-error">
+                <p>{onLeaveError}</p>
+              </div>
+            ) : onLeaveToday.length === 0 ? (
+              <div className="empty-state">
+                <p>No team members on leave today</p>
+              </div>
+            ) : (
+              <ul className="on-leave-list">
+                {onLeaveToday.map((leave) => (
+                  <li key={leave._id} className="on-leave-item">
+                    <span className="on-leave-name">{leave.user?.name || 'Unknown'}</span>
+                    <span className="on-leave-meta">
+                      {leave.type} · {formatDisplayDate(leave.startDateStr)} – {formatDisplayDate(leave.endDateStr)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
       </div>
@@ -205,40 +226,7 @@ const ContentBlocks = () => {
           </div>
         </div>
 
-        <div className="content-block">
-          <div className="block-header">
-            <h3>
-              <img src="/images/team.png" alt="Team Members on Leave" className="block-header-icon" />
-              Team Members on Leave
-            </h3>
-          </div>
-          <div className="block-content">
-            {onLeaveLoading ? (
-              <div className="empty-state">
-                <p>Loading...</p>
-              </div>
-            ) : onLeaveError ? (
-              <div className="empty-state on-leave-error">
-                <p>{onLeaveError}</p>
-              </div>
-            ) : onLeaveToday.length === 0 ? (
-              <div className="empty-state">
-                <p>No team members on leave today</p>
-              </div>
-            ) : (
-              <ul className="on-leave-list">
-                {onLeaveToday.map((leave) => (
-                  <li key={leave._id} className="on-leave-item">
-                    <span className="on-leave-name">{leave.user?.name || 'Unknown'}</span>
-                    <span className="on-leave-meta">
-                      {leave.type} · {formatDisplayDate(leave.startDateStr)} – {formatDisplayDate(leave.endDateStr)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
+      
       </div>
     </div>
   );
