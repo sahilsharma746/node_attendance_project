@@ -37,6 +37,7 @@ const Updates = () => {
     };
     fetchUpdates();
   }, []);
+  
 
   return (
     <div className="updates-container">

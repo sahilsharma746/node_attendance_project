@@ -6,18 +6,22 @@ import '../css/Organizations.css';
 const Organizations = () => {
     const [teamMembers, setTeamMembers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
     const { user } = useAuth();
 
     useEffect(() => {
-        fetchTeamMembers();
-    }, []);
+        if (user) fetchTeamMembers();
+    }, [user]);
 
     const fetchTeamMembers = async () => {
         try {
+            setError('');
             const response = await axios.get('http://localhost:3002/api/auth/users');
-            setTeamMembers(response.data);
-        } catch (error) {
-            console.error('Error fetching team members:', error);
+            setTeamMembers(Array.isArray(response.data) ? response.data : []);
+        } catch (err) {
+            console.error('Error fetching team members:', err);
+            setTeamMembers([]);
+            setError(err.response?.data?.msg || 'Failed to load team members');
         } finally {
             setLoading(false);
         }
@@ -77,6 +81,10 @@ const Organizations = () => {
                 {loading ? (
                     <div className="loading-state">
                         <p>Loading team members...</p>
+                    </div>
+                ) : error ? (
+                    <div className="empty-state">
+                        <p>{error}</p>
                     </div>
                 ) : teamMembers.length === 0 ? (
                     <div className="empty-state">
