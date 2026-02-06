@@ -138,8 +138,8 @@ const AdminAttendance = () => {
               <tr>
                 <th>Employee</th>
                 <th>Date</th>
-                <th>Check In (IST)</th>
-                <th>Check Out (IST)</th>
+                <th>Check In</th>
+                <th>Check Out</th>
                 <th>Status</th>
                 <th>Late By</th>
                 <th>Breaks</th>

@@ -208,7 +208,9 @@
 
 @media (max-width: 768px) {
   .attendance-container {
+    margin-left: 0;
     padding: 20px;
+    padding-top: 76px; /* space for hamburger */
   }
 
   .attendance-title {

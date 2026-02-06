@@ -361,7 +361,9 @@
 
 @media (max-width: 768px) {
   .leave-request-container {
+    margin-left: 0;
     padding: 20px;
+    padding-top: 76px; /* space for hamburger */
   }
 
   .leave-request-header {

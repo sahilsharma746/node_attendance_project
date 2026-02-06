@@ -1,5 +1,5 @@
-const OFFICE_START_HOUR = 16;
-const OFFICE_START_MINUTE = 15;
+const OFFICE_START_HOUR = 10;
+const OFFICE_START_MINUTE = 5;
 const REQUIRED_WORK_MINUTES = 9 * 60; 
 
 function toDate(value) {

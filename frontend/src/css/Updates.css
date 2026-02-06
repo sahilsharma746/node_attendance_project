@@ -132,3 +132,15 @@
   font-size: 13px;
   color: #6b7280;
 }
+
+@media (max-width: 768px) {
+  .updates-container {
+    margin-left: 0;
+    padding: 20px;
+    padding-top: 76px; /* space for hamburger */
+  }
+
+  .updates-title {
+    font-size: 24px;
+  }
+}

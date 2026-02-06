@@ -75,3 +75,21 @@
   width: 20px;
   height: 20px;
 }
+
+@media (max-width: 768px) {
+  .admin-panel-container {
+    margin-left: 0;
+    padding: 20px;
+    padding-top: 76px; 
+  }
+
+  .admin-title {
+    font-size: 24px;
+  }
+
+  .admin-nav-tabs {
+    gap: 12px;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

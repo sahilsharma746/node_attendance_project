@@ -10,7 +10,7 @@ app.use(cors());
 
 connectDB();
 
-app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/auth", require("./routes/authRoutes")); 
 app.use("/api/attendance", require("./routes/attendanceRoutes"));
 app.use("/api/leave", require("./routes/leaveRoutes"));
 app.use("/api/holidays", require("./routes/holidayRoutes"));

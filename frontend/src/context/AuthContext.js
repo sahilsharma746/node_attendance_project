@@ -60,28 +60,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (name, email, password, role = 'user') => {
+  const createUser = async (name, email, password, role) => {
     try {
-      const response = await axios.post('http://localhost:3002/api/auth/register', {
+      const response = await axios.post('http://localhost:3002/api/auth/users', {
         name,
         email,
         password,
-        role,
+        role: role || 'employee',
       });
-      
-      const { token: newToken, user: userData } = response.data;
-      
-      localStorage.setItem('token', newToken);
-      setToken(newToken);
-      setUser(userData);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-      
-      return { success: true };
+      return { success: true, user: response.data.user };
     } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.msg || 'Registration failed. Please try again.',
-      };
+      const msg = error.response?.data?.msg
+        || error.response?.data?.error
+        || (error.response?.status === 403 && 'Access denied. Admin only.')
+        || (error.response?.status === 401 && 'Please log in again.')
+        || error.message
+        || 'Failed to create user.';
+      return { success: false, error: msg };
     }
   };
 
@@ -105,7 +100,7 @@ export const AuthProvider = ({ children }) => {
     token,
     loading,
     login,
-    register,
+    createUser,
     logout,
     isAdmin,
     isEmployee,
