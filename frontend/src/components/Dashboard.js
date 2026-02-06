@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from './Sidebar';
 import MainContent from './MainContent';
 import Attendance from './Attendance';
@@ -16,22 +16,61 @@ const AdminRoute = ({ children }) => {
 };
 
 const Dashboard = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Close the off-canvas sidebar when returning to desktop widths.
+  useEffect(() => {
+    const mql = window.matchMedia('(min-width: 769px)');
+    const onChange = (e) => {
+      if (e.matches) setSidebarOpen(false);
+    };
+
+    // Safari fallback
+    if (mql.addEventListener) mql.addEventListener('change', onChange);
+    else mql.addListener(onChange);
+
+    return () => {
+      if (mql.removeEventListener) mql.removeEventListener('change', onChange);
+      else mql.removeListener(onChange);
+    };
+  }, []);
+
   return (
     <div className="dashboard-container">
-      <Sidebar />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+      {!sidebarOpen && (
+        <button
+          type="button"
+          className="sidebar-toggle"
+          aria-label="Open menu"
+          aria-expanded={sidebarOpen}
+          onClick={() => setSidebarOpen(true)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+      )}
+
+      <div
+        className={`sidebar-backdrop ${sidebarOpen ? 'open' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+
       <Routes>
         <Route index element={<MainContent />} />
         <Route path="attendance" element={<Attendance />} />
         <Route path="leave-request" element={<LeaveRequest />} />
         <Route path="updates" element={<Updates />} />
         <Route path="organizations" element={<Organizations />} />
-        <Route 
-          path="admin-panel/*" 
+        <Route
+          path="admin-panel/*"
           element={
             <AdminRoute>
               <AdminPanel />
             </AdminRoute>
-          } 
+          }
         />
       </Routes>
     </div>

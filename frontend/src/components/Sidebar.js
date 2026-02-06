@@ -3,10 +3,15 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../css/Sidebar.css';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
   const location = useLocation();
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
+
+  const handleNavClick = () => {
+    // On mobile, close the off-canvas sidebar after navigation.
+    if (window.innerWidth <= 768) onClose();
+  };
 
   const handleLogout = () => {
     logout();
@@ -28,9 +33,17 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="sidebar">
+    <div className={`sidebar ${isOpen ? 'open' : ''}`} aria-hidden={!isOpen}>
       <div className="sidebar-header">
         <h1>ATTENDANCE SYSTEM</h1>
+        <button
+          type="button"
+          className="sidebar-close"
+          onClick={onClose}
+          aria-label="Close menu"
+        >
+          ×
+        </button>
       </div>
       
       <nav className="sidebar-nav">
@@ -38,6 +51,7 @@ const Sidebar = () => {
           to="/dashboard" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
           end
+          onClick={handleNavClick}
         >
           <img src="/images/system.png" alt="Dashboard" className="nav-icon" />
           <span>Dashboard</span>
@@ -45,6 +59,7 @@ const Sidebar = () => {
         <NavLink 
           to="/dashboard/attendance" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+          onClick={handleNavClick}
         >
           <img src="/images/attendance.png" alt="My Attendance" className="nav-icon" />
           <span>My Attendance</span>
@@ -52,6 +67,7 @@ const Sidebar = () => {
         <NavLink 
           to="/dashboard/leave-request" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+          onClick={handleNavClick}
         >
           <img src="/images/request-for-proposal.png" alt="Leave Requests" className="nav-icon" />
           <span>Leave Requests</span>
@@ -59,6 +75,7 @@ const Sidebar = () => {
         <NavLink 
           to="/dashboard/updates" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+          onClick={handleNavClick}
         >
           <img src="/images/updated.png" alt="Updates" className="nav-icon" />
           <span>Updates</span>
@@ -66,6 +83,7 @@ const Sidebar = () => {
         <NavLink 
           to="/dashboard/organizations" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+          onClick={handleNavClick}
         >
           <img src="/images/business.png" alt="Organization" className="nav-icon" />
           <span>Organizations</span>
@@ -74,6 +92,7 @@ const Sidebar = () => {
           <NavLink 
             to="/dashboard/admin-panel" 
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            onClick={handleNavClick}
           >
             <img src="/images/admin-panel.png" alt="Admin Panel" className="nav-icon" />
             <span>Admin Panel</span>

@@ -145,6 +145,16 @@
 }
 
 @media (max-width: 768px) {
+  .organizations-container {
+    margin-left: 0;
+    padding: 20px;
+    padding-top: 76px; /* space for hamburger */
+  }
+
+  .organizations-title {
+    font-size: 24px;
+  }
+
   .team-members-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 16px;
