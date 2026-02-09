@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { getAttendanceStatus } from '../utils/attendanceCalculator';
 import '../css/Attendance.css';
 
-const API_BASE = 'http://localhost:3002/api/attendance';
+const API_BASE = 'http://localhost:3000/api/attendance';
 
 const Attendance = () => {
   const { user } = useAuth();

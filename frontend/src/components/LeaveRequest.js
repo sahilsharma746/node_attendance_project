@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../css/LeaveRequest.css';
 
-const API_BASE = 'http://localhost:3002/api/leave';
+const API_BASE = 'http://localhost:3000/api/leave';
 
 const LEAVE_TYPES = [
   { value: 'casual', label: 'Casual Leave' },

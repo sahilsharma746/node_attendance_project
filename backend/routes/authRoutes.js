@@ -17,13 +17,16 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email });
+    const emailNormalized = String(email).trim().toLowerCase();
+    const user = await User.findOne({ email: emailNormalized });
     if (!user) {
+      console.log("[Login] No user found for email:", emailNormalized);
       return res.status(400).json({ msg: "Invalid credentials" });
     }
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
+      console.log("[Login] Password mismatch for email:", emailNormalized);
       return res.status(400).json({ msg: "Invalid credentials" });
     }
 

@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import '../../css/admin/AdminAttendance.css';
 
-const API_BASE = 'http://localhost:3002/api/attendance';
-const AUTH_BASE = 'http://localhost:3002/api/auth';
+const API_BASE = 'http://localhost:3000/api/attendance';
+const AUTH_BASE = 'http://localhost:3000/api/auth';
 
 function timeToInput(dateStrOrDate) {
   if (!dateStrOrDate) return '';
