@@ -230,6 +230,43 @@ router.get("/today", auth, async (req, res) => {
   }
 });
 
+router.get("/in-office", auth, async (req, res) => {
+  try {
+    const now = new Date();
+    const dateStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    const records = await Attendance.find({
+      date: dateStart,
+      checkOut: null, // Only those who haven't checked out
+    })
+      .populate("user", "name email")
+      .sort({ checkIn: 1 })
+      .lean();
+
+    const formatted = records.map((r) => {
+      const attendanceStatus = getAttendanceStatus(r.checkIn, r.checkOut);
+      return {
+        _id: r._id,
+        user: r.user ? { 
+          _id: r.user._id,
+          name: r.user.name, 
+          email: r.user.email 
+        } : null,
+        checkIn: formatTime(r.checkIn),
+        checkInRaw: r.checkIn,
+        status: attendanceStatus.statusMessage,
+        isLate: attendanceStatus.isLate,
+        lateMinutes: attendanceStatus.lateMinutes,
+      };
+    });
+
+    res.json(formatted);
+  } catch (error) {
+    console.error("In office error:", error);
+    res.status(500).json({ msg: "Failed to fetch employees in office" });
+  }
+});
+
 function formatTime(date) {
   return new Date(date).toLocaleTimeString("en-US", {
     hour: "2-digit",
