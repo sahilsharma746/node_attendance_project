@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
+import { getAttendanceStatus } from '../utils/attendanceCalculator';
 import '../css/ContentBlocks.css';
 
 const LEAVE_API = 'http://localhost:3002/api/leave';
 const HOLIDAYS_API = 'http://localhost:3002/api/holidays';
 const UPDATES_API = 'http://localhost:3002/api/updates';
+const ATTENDANCE_API = 'http://localhost:3002/api/attendance';
 
 const formatDisplayDate = (dateStr) => {
   if (!dateStr) return '';
@@ -25,6 +28,7 @@ const formatUpdateDate = (dateStr) => {
 };
 
 const ContentBlocks = () => {
+  const { user } = useAuth();
   const [onLeaveToday, setOnLeaveToday] = useState([]);
   const [onLeaveLoading, setOnLeaveLoading] = useState(true);
   const [onLeaveError, setOnLeaveError] = useState(null);
@@ -34,6 +38,12 @@ const ContentBlocks = () => {
   const [updates, setUpdates] = useState([]);
   const [updatesLoading, setUpdatesLoading] = useState(true);
   const [updatesError, setUpdatesError] = useState(null);
+  const [checkInStatus, setCheckInStatus] = useState(null);
+  const [checkInLoading, setCheckInLoading] = useState(true);
+  const [checkInError, setCheckInError] = useState(null);
+  const [employeesInOffice, setEmployeesInOffice] = useState([]);
+  const [employeesInOfficeLoading, setEmployeesInOfficeLoading] = useState(true);
+  const [employeesInOfficeError, setEmployeesInOfficeError] = useState(null);
 
   useEffect(() => {
     const fetchOnLeaveToday = async () => {
@@ -83,25 +93,117 @@ const ContentBlocks = () => {
     fetchUpdates();
   }, []);
 
+  useEffect(() => {
+    const fetchCheckInStatus = async () => {
+      if (!user) {
+        setCheckInLoading(false);
+        return;
+      }
+      try {
+        setCheckInError(null);
+        const res = await axios.get(`${ATTENDANCE_API}/today`);
+        setCheckInStatus({
+          checkedIn: res.data.checkedIn,
+          checkInTime: res.data.checkInTime ? new Date(res.data.checkInTime) : null,
+          record: res.data.record,
+        });
+      } catch (err) {
+        setCheckInStatus(null);
+        setCheckInError(err.response?.data?.msg || err.message || 'Failed to load check-in status');
+      } finally {
+        setCheckInLoading(false);
+      }
+    };
+    fetchCheckInStatus();
+  }, [user]);
+
+  useEffect(() => {
+    const fetchEmployeesInOffice = async () => {
+      if (!user) {
+        setEmployeesInOfficeLoading(false);
+        return;
+      }
+      try {
+        setEmployeesInOfficeError(null);
+        const res = await axios.get(`${ATTENDANCE_API}/in-office`);
+        setEmployeesInOffice(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        setEmployeesInOffice([]);
+        const msg = err.response?.status === 404
+          ? 'Employees in office not available. Restart the backend server.'
+          : (err.response?.data?.msg || err.message || 'Failed to load employees in office');
+        setEmployeesInOfficeError(msg);
+      } finally {
+        setEmployeesInOfficeLoading(false);
+      }
+    };
+    fetchEmployeesInOffice();
+  }, [user]);
+
   return (
     <div className="content-blocks">
       <div className="content-column">
         <div className="content-block">
           <div className="block-header">
             <h3>Today's Status</h3>
-            
-             
           </div>
           <div className="block-content">
-            <div className="status-display">
-              <div className="status-icon-large">
-               <img src="/images/wall-clock.png" alt="Not Checked In" />
+            {checkInLoading ? (
+              <div className="empty-state">
+                <p>Loading...</p>
               </div>
-              <div className="status-text">
-                <div className="status-title">Not Checked In</div>
-                <div className="status-subtitle">Check In Time</div>
+            ) : checkInError ? (
+              <div className="empty-state on-leave-error">
+                <p>{checkInError}</p>
               </div>
-            </div>
+            ) : !checkInStatus || !checkInStatus.checkInTime ? (
+              <div className="status-display">
+                <div className="status-icon-large">
+                  <img src="/images/wall-clock.png" alt="Not Checked In" />
+                </div>
+                <div className="status-text">
+                  <div className="status-title">Not Checked In</div>
+                  <div className="status-subtitle">Check in to record your attendance</div>
+                </div>
+              </div>
+            ) : (() => {
+              const status = getAttendanceStatus(checkInStatus.checkInTime, null);
+              const formatTime = (date) => {
+                return new Date(date).toLocaleTimeString('en-US', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true,
+                });
+              };
+              const displayStatus = checkInStatus.record?.status || status.statusMessage;
+              const isLate = checkInStatus.record?.isLate || status.isLate;
+              
+              return (
+                <div className="status-display">
+                  <div className="status-icon-large">
+                    <img src={checkInStatus.checkedIn ? "/images/clock.png" : "/images/wall-clock.png"} alt={checkInStatus.checkedIn ? "Checked In" : "Checked Out"} />
+                  </div>
+                  <div className="status-text">
+                    <div className="status-title">
+                      {checkInStatus.checkedIn ? "Checked In" : "Checked Out"}
+                    </div>
+                    <div className="status-subtitle">
+                      {formatTime(checkInStatus.checkInTime)}
+                    </div>
+                    {displayStatus && (
+                      <div className="status-message" style={{ 
+                        marginTop: '8px', 
+                        fontSize: '12px', 
+                        color: isLate ? '#dc2626' : '#22c55e',
+                        fontWeight: 500
+                      }}>
+                        {displayStatus}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
 
@@ -220,9 +322,37 @@ const ContentBlocks = () => {
             </h3>
           </div>
           <div className="block-content">
-            <div className="empty-state">
-              <p>No employees currently in office</p>
-            </div>
+            {employeesInOfficeLoading ? (
+              <div className="empty-state">
+                <p>Loading...</p>
+              </div>
+            ) : employeesInOfficeError ? (
+              <div className="empty-state on-leave-error">
+                <p>{employeesInOfficeError}</p>
+              </div>
+            ) : employeesInOffice.length === 0 ? (
+              <div className="empty-state">
+                <p>No employees currently in office</p>
+              </div>
+            ) : (
+              <ul className="on-leave-list">
+                {employeesInOffice.map((employee) => (
+                  <li key={employee._id} className="on-leave-item" style={{ borderLeftColor: employee.isLate ? '#dc2626' : '#22c55e' }}>
+                    <span className="on-leave-name">{employee.user?.name || 'Unknown'}</span>
+                    <span className="on-leave-meta">
+                      Checked in: {employee.checkIn}
+                    </span>
+                    <span className="on-leave-meta" style={{ 
+                      color: employee.isLate ? '#dc2626' : '#22c55e',
+                      fontWeight: 500,
+                      marginTop: '2px'
+                    }}>
+                      {employee.status}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
 

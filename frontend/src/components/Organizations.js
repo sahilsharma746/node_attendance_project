@@ -63,6 +63,7 @@ const Organizations = () => {
         return userId?.toString() === compareId;
     };
 
+    
     return (
         <div className="organizations-container">
             <div className="organizations-header">
