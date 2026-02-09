@@ -16,7 +16,7 @@ const Organizations = () => {
     const fetchTeamMembers = async () => {
         try {
             setError('');
-            const response = await axios.get('http://localhost:3002/api/auth/users');
+            const response = await axios.get('http://localhost:3000/api/auth/users');
             setTeamMembers(Array.isArray(response.data) ? response.data : []);
         } catch (err) {
             console.error('Error fetching team members:', err);

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import '../../css/admin/AdminEmployees.css';
 
-const API_BASE = 'http://localhost:3002/api/auth';
+const API_BASE = 'http://localhost:3000/api/auth';
 
 const AdminEmployees = () => {
   const { createUser } = useAuth();

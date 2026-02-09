@@ -4,10 +4,10 @@ import { useAuth } from '../context/AuthContext';
 import { getAttendanceStatus } from '../utils/attendanceCalculator';
 import '../css/ContentBlocks.css';
 
-const LEAVE_API = 'http://localhost:3002/api/leave';
-const HOLIDAYS_API = 'http://localhost:3002/api/holidays';
-const UPDATES_API = 'http://localhost:3002/api/updates';
-const ATTENDANCE_API = 'http://localhost:3002/api/attendance';
+const LEAVE_API = 'http://localhost:3000/api/leave';
+const HOLIDAYS_API = 'http://localhost:3000/api/holidays';
+const UPDATES_API = 'http://localhost:3000/api/updates';
+const ATTENDANCE_API = 'http://localhost:3000/api/attendance';
 
 const formatDisplayDate = (dateStr) => {
   if (!dateStr) return '';

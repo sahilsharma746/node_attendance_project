@@ -1,6 +1,8 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3002';
+
 const AuthContext = createContext();
 
 export const useAuth = () => {
@@ -27,7 +29,7 @@ export const AuthProvider = ({ children }) => {
 
   const verifyToken = async () => {
     try {
-      const response = await axios.get('http://localhost:3002/api/auth/me');
+      const response = await axios.get(`${API_BASE}/api/auth/me`);
       setUser(response.data);
     } catch (error) {
       console.error('Token verification failed:', error);
@@ -39,30 +41,40 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('http://localhost:3002/api/auth/login', {
+      const response = await axios.post(`${API_BASE}/api/auth/login`, {
         email,
         password,
       });
-      
-      const { token: newToken, user: userData } = response.data;
-      
+
+      const data = response?.data;
+      const newToken = data?.token;
+      const userData = data?.user;
+
+      if (!newToken || !userData) {
+        return {
+          success: false,
+          error: data?.msg || 'Invalid response from server. Please try again.',
+        };
+      }
+
       localStorage.setItem('token', newToken);
       setToken(newToken);
       setUser(userData);
       axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-      
+
       return { success: true };
     } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.msg || 'Login failed. Please try again.',
-      };
+      const message =
+        error.response?.data?.msg ||
+        (error.code === 'ERR_NETWORK' && 'Cannot reach server. Is the backend running?') ||
+        'Login failed. Please try again.';
+      return { success: false, error: message };
     }
   };
 
   const createUser = async (name, email, password, role) => {
     try {
-      const response = await axios.post('http://localhost:3002/api/auth/users', {
+      const response = await axios.post(`${API_BASE}/api/auth/users`, {
         name,
         email,
         password,

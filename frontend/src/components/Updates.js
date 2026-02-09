@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../css/Updates.css';
 
-const API_BASE = 'http://localhost:3002/api/updates';
+const API_BASE = 'http://localhost:3000/api/updates';
 
 const formatUpdateDate = (dateStr) => {
   if (!dateStr) return '';
