@@ -5,6 +5,7 @@ import Attendance from './Attendance';
 import LeaveRequest from './LeaveRequest';
 import Updates from './Updates';
 import Organizations from './Organizations';
+import Profile from './Profile';
 import AdminPanel from './AdminPanel';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -64,6 +65,7 @@ const Dashboard = () => {
         <Route path="leave-request" element={<LeaveRequest />} />
         <Route path="updates" element={<Updates />} />
         <Route path="organizations" element={<Organizations />} />
+        <Route path="profile" element={<Profile />} />
         <Route
           path="admin-panel/*"
           element={

@@ -26,6 +26,10 @@ const AdminAttendance = () => {
   const [editForm, setEditForm] = useState({ checkInTime: '', checkOutTime: '' });
   const [updateLoading, setUpdateLoading] = useState(false);
   const [error, setError] = useState('');
+  const [lateToday, setLateToday] = useState([]);
+  const [summary, setSummary] = useState([]);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [lateLoading, setLateLoading] = useState(false);
 
   const fetchRecords = useCallback(async () => {
     setLoading(true);
@@ -59,9 +63,45 @@ const AdminAttendance = () => {
     fetchRecords();
   }, [fetchRecords]);
 
+  const fetchLateToday = useCallback(async () => {
+    setLateLoading(true);
+    try {
+      const res = await axios.get(`${API_BASE}/late-today`);
+      setLateToday(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error('Failed to fetch late arrivals:', err);
+      setLateToday([]);
+    } finally {
+      setLateLoading(false);
+    }
+  }, []);
+
+  const fetchSummary = useCallback(async () => {
+    setSummaryLoading(true);
+    try {
+      const res = await axios.get(`${API_BASE}/summary`, {
+        params: { month: filterMonth, year: filterYear },
+      });
+      setSummary(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error('Failed to fetch summary:', err);
+      setSummary([]);
+    } finally {
+      setSummaryLoading(false);
+    }
+  }, [filterMonth, filterYear]);
+
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
+
+  useEffect(() => {
+    fetchLateToday();
+  }, [fetchLateToday]);
+
+  useEffect(() => {
+    fetchSummary();
+  }, [fetchSummary]);
 
   const openEdit = (record) => {
     const dateStr = record.dateStr || (record.date && new Date(record.date).toISOString().slice(0, 10));
@@ -100,6 +140,7 @@ const AdminAttendance = () => {
       });
       closeEditModal();
       fetchRecords();
+      fetchLateToday();
     } catch (err) {
       setError(err.response?.data?.msg || 'Failed to update record');
     } finally {
@@ -233,14 +274,41 @@ const AdminAttendance = () => {
             <h2 className="section-title">Late Arrivals Today (IST)</h2>
           </div>
         </div>
-        <div className="empty-late-arrivals">
-          <p>No late arrivals today</p>
-        </div>
+        {lateLoading ? (
+          <p className="loading-text">Loading...</p>
+        ) : lateToday.length === 0 ? (
+          <div className="empty-late-arrivals">
+            <p>No late arrivals today</p>
+          </div>
+        ) : (
+          <div className="table-container">
+            <table className="attendance-table">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Check In</th>
+                  <th>Late By</th>
+                </tr>
+              </thead>
+              <tbody>
+                {lateToday.map((r) => (
+                  <tr key={r._id}>
+                    <td>{r.user?.name || r.user?.email || '-'}</td>
+                    <td>{r.checkIn}</td>
+                    <td>{r.lateBy ?? '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <div className="attendance-card">
         <div className="card-header-section">
-          <h2 className="section-title">Attendance Summary (January 2026)</h2>
+          <h2 className="section-title">
+            Attendance Summary ({new Date(Number(filterYear), Number(filterMonth) - 1).toLocaleString('default', { month: 'long' })} {filterYear})
+          </h2>
         </div>
         <div className="table-container">
           <table className="attendance-table">
@@ -253,30 +321,29 @@ const AdminAttendance = () => {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>
-                  <div className="employee-cell">
-                    <div className="avatar admin-avatar"></div>
-                    <span></span>
-                  </div>
-                </td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-              <tr>
-                <td>
-                  <div className="employee-cell">
-                    <div className="avatar">
-                      <span></span>
-                    </div>
-                    <span></span>
-                  </div>
-                </td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
+              {summaryLoading ? (
+                <tr>
+                  <td colSpan={4} className="loading-cell">Loading...</td>
+                </tr>
+              ) : summary.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="empty-cell">No summary data for this period</td>
+                </tr>
+              ) : (
+                summary.map((row) => (
+                  <tr key={row.user._id}>
+                    <td>
+                      <div className="employee-cell">
+                        <div className="avatar admin-avatar"></div>
+                        <span>{row.user.name || row.user.email}</span>
+                      </div>
+                    </td>
+                    <td>{row.daysPresent}</td>
+                    <td>{row.daysOnLeave}</td>
+                    <td>{row.totalWorkingDays}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

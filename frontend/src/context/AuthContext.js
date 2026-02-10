@@ -72,6 +72,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateProfile = async (updates) => {
+    try {
+      const response = await axios.patch(`${API_BASE}/api/auth/me`, updates);
+      const updated = response.data;
+      setUser((prev) => (prev ? { ...prev, ...updated, id: updated.id || prev.id } : null));
+      return { success: true };
+    } catch (error) {
+      const msg = error.response?.data?.msg || error.message || 'Failed to update profile';
+      return { success: false, error: msg };
+    }
+  };
+
   const createUser = async (name, email, password, role) => {
     try {
       const response = await axios.post(`${API_BASE}/api/auth/users`, {
@@ -113,6 +125,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     createUser,
+    updateProfile,
     logout,
     isAdmin,
     isEmployee,

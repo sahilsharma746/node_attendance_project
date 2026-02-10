@@ -19,6 +19,7 @@ const AdminEmployees = () => {
   });
   const [message, setMessage] = useState({ type: '', text: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
   const fetchUsers = async () => {
     try {
@@ -100,6 +101,21 @@ const AdminEmployees = () => {
       .slice(0, 2);
   };
 
+  const handleDelete = async (userToDelete) => {
+    if (!window.confirm(`Delete employee "${userToDelete.name}"? This cannot be undone.`)) return;
+    setDeletingId(userToDelete._id);
+    setMessage({ type: '', text: '' });
+    try {
+      await axios.delete(`${API_BASE}/users/${userToDelete._id}`);
+      setMessage({ type: 'success', text: 'Employee deleted successfully' });
+      fetchUsers();
+    } catch (err) {
+      setMessage({ type: 'error', text: err.response?.data?.msg || 'Failed to delete employee' });
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <div className="admin-employees">
       <div className="employees-card">
@@ -125,12 +141,13 @@ const AdminEmployees = () => {
                   <th>Role</th>
                   <th>Email</th>
                   <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {users.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="empty-row">
+                    <td colSpan={5} className="empty-row">
                       No users yet. Create one as admin.
                     </td>
                   </tr>
@@ -139,7 +156,13 @@ const AdminEmployees = () => {
                     <tr key={u._id}>
                       <td>
                         <div className="employee-cell">
-                          <div className="avatar">{getInitials(u.name)}</div>
+                          <div className="avatar">
+                            {u.profilePic ? (
+                              <img src={u.profilePic} alt="" />
+                            ) : (
+                              getInitials(u.name)
+                            )}
+                          </div>
                           <div className="employee-name-info">
                             <span className="employee-name">{u.name}</span>
                             <span className="employee-username">{u.email}</span>
@@ -155,6 +178,17 @@ const AdminEmployees = () => {
                           <span className="status-dot" />
                           ACTIVE
                         </span>
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          className="admin-delete-employee-btn"
+                          onClick={() => handleDelete(u)}
+                          disabled={deletingId === u._id}
+                          title="Delete employee"
+                        >
+                          {deletingId === u._id ? 'Deleting...' : 'Delete'}
+                        </button>
                       </td>
                     </tr>
                   ))

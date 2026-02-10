@@ -4,6 +4,8 @@ const auth = require("../middleware/auth");
 const authModule = require("../middleware/auth");
 const adminAuth = authModule.adminAuth || authModule;
 const Attendance = require("../models/Attendance");
+const Leave = require("../models/Leave");
+const User = require("../models/User");
 const { getAttendanceStatus } = require("../utils/attendanceCalculator");
 
 
@@ -266,6 +268,102 @@ router.get("/in-office", auth, async (req, res) => {
     res.status(500).json({ msg: "Failed to fetch employees in office" });
   }
 });
+
+// Admin: today's late arrivals (IST)
+router.get("/late-today", adminAuth, async (req, res) => {
+  try {
+    const now = new Date();
+    const dateStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const dateEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+
+    const records = await Attendance.find({
+      date: { $gte: dateStart, $lte: dateEnd },
+    })
+      .populate("user", "name email")
+      .sort({ checkIn: 1 })
+      .lean();
+
+    const formatted = records
+      .map((r) => {
+        const attendanceStatus = getAttendanceStatus(r.checkIn, r.checkOut);
+        return {
+          _id: r._id,
+          user: r.user ? { _id: r.user._id, name: r.user.name, email: r.user.email } : null,
+          checkIn: formatTime(r.checkIn),
+          lateBy: attendanceStatus.lateByFormatted ?? null,
+          isLate: attendanceStatus.isLate,
+        };
+      })
+      .filter((r) => r.isLate);
+
+    res.json(formatted);
+  } catch (error) {
+    console.error("Late today error:", error);
+    res.status(500).json({ msg: "Failed to fetch late arrivals" });
+  }
+});
+
+// Admin: attendance summary for a month (days present, days on leave, total working days)
+router.get("/summary", adminAuth, async (req, res) => {
+  try {
+    const month = Number(req.query.month) || new Date().getMonth() + 1;
+    const year = Number(req.query.year) || new Date().getFullYear();
+    const start = new Date(year, month - 1, 1);
+    const end = new Date(year, month, 0, 23, 59, 59, 999);
+
+    const totalWorkingDays = getWorkingDaysInMonth(month, year);
+
+    const [allUsers, attendanceInMonth, approvedLeaves] = await Promise.all([
+      User.find({}).select("_id name email").lean(),
+      Attendance.find({ date: { $gte: start, $lte: end } }).lean(),
+      Leave.find({
+        status: "approved",
+        startDate: { $lte: end },
+        endDate: { $gte: start },
+      }).lean(),
+    ]);
+
+    const daysPresentByUser = {};
+    attendanceInMonth.forEach((a) => {
+      const uid = a.user.toString();
+      daysPresentByUser[uid] = (daysPresentByUser[uid] || 0) + 1;
+    });
+
+    const daysOnLeaveByUser = {};
+    approvedLeaves.forEach((l) => {
+      const overlapStart = l.startDate <= start ? start : l.startDate;
+      const overlapEnd = l.endDate >= end ? end : l.endDate;
+      const days = Math.max(0, Math.ceil((overlapEnd - overlapStart) / (24 * 60 * 60 * 1000)) + 1);
+      const uid = l.user.toString();
+      daysOnLeaveByUser[uid] = (daysOnLeaveByUser[uid] || 0) + days;
+    });
+
+    const summary = allUsers.map((u) => ({
+      user: { _id: u._id, name: u.name || u.email, email: u.email },
+      daysPresent: daysPresentByUser[u._id.toString()] || 0,
+      daysOnLeave: daysOnLeaveByUser[u._id.toString()] || 0,
+      totalWorkingDays,
+    }));
+
+    res.json(summary);
+  } catch (error) {
+    console.error("Attendance summary error:", error);
+    res.status(500).json({ msg: "Failed to fetch attendance summary" });
+  }
+});
+
+function getWorkingDaysInMonth(month, year) {
+  const start = new Date(year, month - 1, 1);
+  const end = new Date(year, month, 0);
+  let count = 0;
+  const d = new Date(start);
+  while (d <= end) {
+    const day = d.getDay();
+    if (day !== 0 && day !== 6) count++;
+    d.setDate(d.getDate() + 1);
+  }
+  return count;
+}
 
 function formatTime(date) {
   return new Date(date).toLocaleTimeString("en-US", {
