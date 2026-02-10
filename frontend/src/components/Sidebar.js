@@ -9,7 +9,6 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
   const navigate = useNavigate();
 
   const handleNavClick = () => {
-    // On mobile, close the off-canvas sidebar after navigation.
     if (window.innerWidth <= 768) onClose();
   };
 
@@ -53,7 +52,7 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
           end
           onClick={handleNavClick}
         >
-          <img src="/images/system.png" alt="Dashboard" className="nav-icon" />
+          <img src="/images/icons8-dashboard-48.png" alt="Dashboard" className="nav-icon" />
           <span>Dashboard</span>
         </NavLink>
         <NavLink 
@@ -61,7 +60,7 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
           onClick={handleNavClick}
         >
-          <img src="/images/attendance.png" alt="My Attendance" className="nav-icon" />
+          <img src="/images/icons8-attendance-40.png" alt="My Attendance" className="nav-icon" />
           <span>My Attendance</span>
         </NavLink>
         <NavLink 
@@ -69,7 +68,7 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
           onClick={handleNavClick}
         >
-          <img src="/images/request-for-proposal.png" alt="Leave Requests" className="nav-icon" />
+          <img src="/images/icons8-leave-house-48.png" alt="Leave Requests" className="nav-icon" />
           <span>Leave Requests</span>
         </NavLink>
         <NavLink 
@@ -77,7 +76,7 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
           onClick={handleNavClick}
         >
-          <img src="/images/updated.png" alt="Updates" className="nav-icon" />
+          <img src="/images/icons8-update-64.png" alt="Updates" className="nav-icon" />
           <span>Updates</span>
         </NavLink>
         <NavLink 
@@ -85,7 +84,7 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
           onClick={handleNavClick}
         >
-          <img src="/images/business.png" alt="Organization" className="nav-icon" />
+          <img src="/images/icons8-organisation-50.png" alt="Organization" className="nav-icon" />
           <span>Organizations</span>
           </NavLink>
         <NavLink 
@@ -93,7 +92,7 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
           onClick={handleNavClick}
         >
-          <img src="/images/system.png" alt="Profile" className="nav-icon" />
+          <img src="/images/icons8-image-100.png" alt="Profile" className="nav-icon" />
           <span>Profile</span>
         </NavLink>
         {isAdmin() && (
@@ -102,7 +101,7 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
             onClick={handleNavClick}
           >
-            <img src="/images/admin-panel.png" alt="Admin Panel" className="nav-icon" />
+            <img src="/images/icons8-admin.gif" alt="Admin Panel" className="nav-icon" />
             <span>Admin Panel</span>
           </NavLink>
         )}
@@ -124,11 +123,12 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
         </div>
         <button className="sign-out-btn" onClick={handleLogout}>
           <span>Sign Out</span>
-          <img src="/images/log-out.png" alt="Sign Out" className="sign-out-icon" />
+          <img src="/images/icons8-logoff-company-server-portal-for-businessman-website-64.png" alt="Sign Out" className="sign-out-icon" />
         </button>
       </div>
     </div>
   );
 };
+
 
 export default Sidebar;
