@@ -4,20 +4,16 @@ const OFFICE_START_HOUR = 10;
 const OFFICE_START_MINUTE = 5;
 const REQUIRED_WORK_MINUTES = 9 * 60;
 
-
 export function toDate(value) {
   if (value == null) return null;
   const d = new Date(value);
   return Number.isNaN(d.getTime()) ? null : d;
 }
-
 export function getOfficeStartForDate(date) {
   const d = new Date(date);
   d.setHours(OFFICE_START_HOUR, OFFICE_START_MINUTE, 0, 0);
   return d;
 }
-
-
 export function minutesBetween(start, end) {
   if (!start || !end) return 0;
   const s = toDate(start);
@@ -75,9 +71,7 @@ export function getAttendanceStatus(checkIn, checkOut) {
           : "Checked in on time (no check-out yet)",
     };
   }
-
   const totalWorkMinutes = minutesBetween(cin, cout);
-
 
   const lateWaived = totalWorkMinutes >= REQUIRED_WORK_MINUTES;
   const lateMinutes = lateWaived ? 0 : isAfterOfficeStart ? rawLateMinutes : 0;
