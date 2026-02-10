@@ -1,7 +1,7 @@
 
 
 const OFFICE_START_HOUR = 10;
-const OFFICE_START_MINUTE = 0;
+const OFFICE_START_MINUTE = 5;
 const REQUIRED_WORK_MINUTES = 9 * 60;
 
 

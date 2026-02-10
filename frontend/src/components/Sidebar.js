@@ -88,6 +88,14 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
           <img src="/images/business.png" alt="Organization" className="nav-icon" />
           <span>Organizations</span>
           </NavLink>
+        <NavLink 
+          to="/dashboard/profile" 
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+          onClick={handleNavClick}
+        >
+          <img src="/images/system.png" alt="Profile" className="nav-icon" />
+          <span>Profile</span>
+        </NavLink>
         {isAdmin() && (
           <NavLink 
             to="/dashboard/admin-panel" 
@@ -102,7 +110,13 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
 
       <div className="sidebar-footer">
         <div className="user-profile">
-          <div className="user-avatar">{getInitials(user?.name)}</div>
+          <div className="user-avatar">
+            {user?.profilePic ? (
+              <img src={user.profilePic} alt="" />
+            ) : (
+              getInitials(user?.name)
+            )}
+          </div>
           <div className="user-info">
             <div className="user-name">{user?.name || 'User'}</div>
             <div className="user-role">{getRoleDisplay(user?.role)}</div>

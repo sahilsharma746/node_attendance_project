@@ -6,7 +6,6 @@ const User = require("../models/User");
 const auth = require("../middleware/auth");
 const adminAuth = auth.adminAuth;
 
-// Public registration disabled. Only admins create users via POST /users; users login only.
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -43,6 +42,7 @@ router.post("/login", async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        profilePic: user.profilePic || "",
       },
     });
   } catch (error) {
@@ -54,7 +54,6 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Admin-only: create user (including other admins). Mounted as POST /api/auth/users
 router.post("/users", auth, adminAuth, async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -102,6 +101,36 @@ router.post("/users", auth, adminAuth, async (req, res) => {
   }
 });
 
+router.patch("/me", auth, async (req, res) => {
+  try {
+    const { name, profilePic } = req.body;
+    const updates = {};
+    if (typeof name === "string" && name.trim()) updates.name = name.trim();
+    if (typeof profilePic === "string") updates.profilePic = profilePic.trim();
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ msg: "No valid fields to update" });
+    }
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { $set: updates },
+      { new: true, runValidators: true }
+    )
+      .select("-password")
+      .lean();
+    if (!user) return res.status(404).json({ msg: "User not found" });
+    res.json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      profilePic: user.profilePic || "",
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    res.status(500).json({ msg: "Server error", error: error.message });
+  }
+});
+
 router.get("/me", auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
@@ -113,6 +142,7 @@ router.get("/me", auth, async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      profilePic: user.profilePic || "",
     });
   } catch (error) {
     console.error("Get user error:", error);
@@ -123,17 +153,36 @@ router.get("/me", auth, async (req, res) => {
   }
 });
 
-// List users: any authenticated user (admin = full list, employee = id/name/role only)
 router.get("/users", auth, async (req, res) => {
   try {
     const isAdmin = req.user && req.user.role === "admin";
     const users = await User.find()
-      .select(isAdmin ? "-password" : "_id name role")
+      .select(isAdmin ? "-password" : "_id name role profilePic")
       .sort({ name: 1 })
       .lean();
     res.json(users);
   } catch (error) {
     console.error("Get users error:", error);
+    res.status(500).json({
+      msg: "Server error",
+      error: error.message,
+    });
+  }
+});
+
+router.delete("/users/:id", auth, adminAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (id === req.user.id) {
+      return res.status(400).json({ msg: "You cannot delete your own account" });
+    }
+    const user = await User.findByIdAndDelete(id);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+    res.json({ msg: "User deleted successfully" });
+  } catch (error) {
+    console.error("Delete user error:", error);
     res.status(500).json({
       msg: "Server error",
       error: error.message,

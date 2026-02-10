@@ -116,6 +116,7 @@ const Organizations = () => {
                 )}
             </div>
         </div>
+        
     );
 };
 
