@@ -122,7 +122,7 @@ const LeaveRequest = () => {
       </div>
 
       <div className="summary-cards">
-        <div className="summary-card">
+        {/* <div className="summary-card">
           <div className="card-title">Total Balance</div>
           <div className="card-value">{stats.remaining}</div>
           <div className="card-subtitle">Days remaining</div>
@@ -131,12 +131,12 @@ const LeaveRequest = () => {
           <div className="card-title">Used This Year</div>
           <div className="card-value">{stats.usedThisYear}</div>
           <div className="card-subtitle">Days taken</div>
-        </div>
-        <div className="summary-card">
+        </div> */}
+        {/* <div className="summary-card">
           <div className="card-title">Pending</div>
           <div className="card-value">{stats.pendingCount}</div>
           <div className="card-subtitle">Requests awaiting approval</div>
-        </div>
+        </div> */}
       </div>
 
       <div className="request-history-section">

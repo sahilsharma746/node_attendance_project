@@ -4,6 +4,7 @@ import '../css/Updates.css';
 
 const API_BASE = 'http://localhost:3000/api/updates';
 
+
 const formatUpdateDate = (dateStr) => {
   if (!dateStr) return '';
   const d = new Date(dateStr);

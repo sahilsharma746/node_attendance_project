@@ -37,6 +37,9 @@ const Organizations = () => {
     };
 
     const getAvatarColor = (name) => {
+        if (!name) {
+            return 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        }
         const colors = [
             'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
@@ -99,7 +102,11 @@ const Organizations = () => {
                                     className="member-avatar" 
                                     style={{ background: getAvatarColor(member.name) }}
                                 >
-                                    {getInitials(member.name)}
+                                    {member.profilePic ? (
+                                        <img src={member.profilePic} alt="" />
+                                    ) : (
+                                        getInitials(member.name)
+                                    )}
                                 </div>
                                 <div className="member-name">{member.name}</div>
                                 <div className="member-roles">

@@ -232,6 +232,63 @@ router.get("/today", auth, async (req, res) => {
   }
 });
 
+
+router.get("/my-summary", auth, async (req, res) => {
+  try {
+    const now = new Date();
+    const month = Number(req.query.month) || now.getMonth() + 1;
+    const year = Number(req.query.year) || now.getFullYear();
+    const start = new Date(year, month - 1, 1);
+    const end = new Date(year, month, 0, 23, 59, 59, 999);
+
+    const records = await Attendance.find({
+      user: req.user.id,
+      date: { $gte: start, $lte: end },
+    })
+      .lean();
+
+    let daysPresent = 0;
+    let lateCount = 0;
+    for (const r of records) {
+      const status = getAttendanceStatus(r.checkIn, r.checkOut);
+      daysPresent += 1;
+      if (status.isLate) lateCount += 1;
+    }
+
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - now.getDay());
+    weekStart.setHours(0, 0, 0, 0);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    weekEnd.setHours(23, 59, 59, 999);
+
+    const weekRecords = await Attendance.find({
+      user: req.user.id,
+      date: { $gte: weekStart, $lte: weekEnd },
+    }).lean();
+
+    let daysPresentThisWeek = 0;
+    let lateCountThisWeek = 0;
+    for (const r of weekRecords) {
+      const status = getAttendanceStatus(r.checkIn, r.checkOut);
+      daysPresentThisWeek += 1;
+      if (status.isLate) lateCountThisWeek += 1;
+    }
+
+    res.json({
+      month,
+      year,
+      daysPresent,
+      lateCount,
+      daysPresentThisWeek,
+      lateCountThisWeek,
+    });
+  } catch (error) {
+    console.error("My summary error:", error);
+    res.status(500).json({ msg: "Failed to fetch attendance summary" });
+  }
+});
+
 router.get("/in-office", auth, async (req, res) => {
   try {
     const now = new Date();

@@ -50,7 +50,7 @@
 
 .leave-request-container .summary-cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 24px;
   margin-bottom: 32px;
 }
@@ -112,7 +112,7 @@
 
 .history-content {
   min-height: 200px;
-  display: flex;
+  /* display: flex; */
   align-items: center;
   justify-content: center;
 }
@@ -386,4 +386,11 @@
   .form-row {
     grid-template-columns: 1fr;
   }
+
+  .leave-request-container .summary-cards {
+    grid-template-columns: repeat(1, 1fr);
+   
+  }
 }
+
+
