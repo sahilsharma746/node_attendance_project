@@ -1,3 +1,7 @@
+:root {
+  --sidebar-width: 72px;
+}
+
 .sidebar {
   width: 280px;
   background-color: #0A0B00;
@@ -10,7 +14,85 @@
   left: 0;
   bottom: 0;
   z-index: 1100; /* above backdrop */
-  transition: transform 0.2s ease;
+  transition: width 0.25s ease, transform 0.2s ease;
+}
+
+.sidebar.collapsed {
+  width: 72px;
+}
+
+.sidebar.collapsed .sidebar-header {
+  justify-content: center;
+  padding: 16px 12px;
+}
+
+.sidebar.collapsed .sidebar-header h1 {
+  opacity: 0;
+  visibility: hidden;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 0;
+  position: absolute;
+}
+
+.sidebar.collapsed .sidebar-close {
+  margin: 0;
+}
+
+.sidebar.collapsed .nav-item {
+  justify-content: center;
+  padding: 15px;
+}
+
+/* Tooltip: hidden by default, shown on hover to the right of the icon */
+.nav-item-tooltip,
+.sign-out-btn .nav-item-tooltip {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 12px;
+  padding: 6px 12px;
+  background: #1a1a1a;
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+  z-index: 1200;
+}
+
+.nav-item {
+  position: relative;
+}
+
+.nav-item:hover .nav-item-tooltip,
+.sign-out-btn:hover .nav-item-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sidebar.collapsed .user-info {
+  opacity: 0;
+  visibility: hidden;
+  width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.sidebar.collapsed .user-profile {
+  justify-content: center;
+  padding-bottom: 12px;
+}
+
+.sidebar.collapsed .sign-out-btn {
+  justify-content: center;
+  padding: 10px;
 }
 
 .sidebar-header {
@@ -151,6 +233,7 @@
 }
 
 .sign-out-btn {
+  position: relative;
   width: 100%;
   display: flex;
   align-items: center;
@@ -179,10 +262,49 @@
   .sidebar {
     transform: translateX(-110%);
     box-shadow: 12px 0 30px rgba(0, 0, 0, 0.35);
+    width: 280px;
   }
 
   .sidebar.open {
     transform: translateX(0);
+  }
+
+  /* On mobile, always show expanded when open for better usability */
+  .sidebar.open.collapsed {
+    width: 280px;
+  }
+
+  .sidebar.open.collapsed .sidebar-header h1,
+  .sidebar.open.collapsed .nav-item .nav-item-tooltip,
+  .sidebar.open.collapsed .user-info,
+  .sidebar.open.collapsed .sign-out-btn .nav-item-tooltip {
+    opacity: 1;
+    visibility: visible;
+    width: auto;
+    position: static;
+    transform: none;
+    margin-left: 0;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .sidebar.open.collapsed .sidebar-header {
+    justify-content: space-between;
+  }
+
+  .sidebar.open.collapsed .nav-item {
+    justify-content: flex-start;
+    padding: 15px 20px;
+  }
+
+  .sidebar.open.collapsed .user-profile {
+    justify-content: flex-start;
+  }
+
+  .sidebar.open.collapsed .sign-out-btn {
+    justify-content: space-between;
+    padding: 10px 16px;
   }
 
   .sidebar-close {

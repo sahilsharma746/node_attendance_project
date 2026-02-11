@@ -32,7 +32,7 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
   };
 
   return (
-    <div className={`sidebar ${isOpen ? 'open' : ''}`} aria-hidden={!isOpen}>
+    <div className={`sidebar collapsed ${isOpen ? 'open' : ''}`} aria-hidden={!isOpen}>
       <div className="sidebar-header">
         <h1>ATTENDANCE SYSTEM</h1>
         <button
@@ -51,58 +51,65 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
           end
           onClick={handleNavClick}
+          title="Dashboard"
         >
-          <img src="/images/icons8-dashboard-48.png" alt="Dashboard" className="nav-icon" />
-          <span>Dashboard</span>
+          <img src="/images/dashboard.png" alt="Dashboard" className="nav-icon" />
+          <span className="nav-item-tooltip">Dashboard</span>
         </NavLink>
         <NavLink 
           to="/dashboard/attendance" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
           onClick={handleNavClick}
+          title="My Attendance"
         >
-          <img src="/images/icons8-attendance-40.png" alt="My Attendance" className="nav-icon" />
-          <span>My Attendance</span>
+          <img src="/images/appointment.png" alt="My Attendance" className="nav-icon" />
+          <span className="nav-item-tooltip">My Attendance</span>
         </NavLink>
         <NavLink 
           to="/dashboard/leave-request" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
           onClick={handleNavClick}
+          title="Leave Requests"
         >
-          <img src="/images/icons8-leave-house-48.png" alt="Leave Requests" className="nav-icon" />
-          <span>Leave Requests</span>
+          <img src="/images/anonymous.png" alt="Leave Requests" className="nav-icon" />
+          <span className="nav-item-tooltip">Leave Requests</span>
         </NavLink>
         <NavLink 
           to="/dashboard/updates" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
           onClick={handleNavClick}
+          title="Updates"
         >
-          <img src="/images/icons8-update-64.png" alt="Updates" className="nav-icon" />
-          <span>Updates</span>
+          <img src="/images/share.png" alt="Updates" className="nav-icon" />
+          <span className="nav-item-tooltip">Updates</span>
         </NavLink>
         <NavLink 
           to="/dashboard/organizations" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
           onClick={handleNavClick}
+          title="Organizations"
         >
-          <img src="/images/icons8-organisation-50.png" alt="Organization" className="nav-icon" />
-          <span>Organizations</span>
-          </NavLink>
+          <img src="/images/division.png" alt="Organizations" className="nav-icon" />
+          <span className="nav-item-tooltip">Organizations</span>
+        </NavLink>
         <NavLink 
           to="/dashboard/profile" 
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
           onClick={handleNavClick}
+          title="Profile"
         >
-          <img src="/images/icons8-image-100.png" alt="Profile" className="nav-icon" />
-          <span>Profile</span>
+          <img src="/images/user-profile.png" alt="Profile" className="nav-icon" />
+          <span className="nav-item-tooltip">Profile</span>
         </NavLink>
         {isAdmin() && (
           <NavLink 
             to="/dashboard/admin-panel" 
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
             onClick={handleNavClick}
+            title="Admin Panel"
           >
-            <img src="/images/icons8-admin.gif" alt="Admin Panel" className="nav-icon" />
-            <span>Admin Panel</span>
+            <img src="/images/optimization.png" alt="Admin Panel" className="nav-icon" />
+            <span className="nav-item-tooltip">Admin Panel</span>
           </NavLink>
         )}
       </nav>
@@ -121,9 +128,9 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
             <div className="user-role">{getRoleDisplay(user?.role)}</div>
           </div>
         </div>
-        <button className="sign-out-btn" onClick={handleLogout}>
-          <span>Sign Out</span>
-          <img src="/images/icons8-logoff-company-server-portal-for-businessman-website-64.png" alt="Sign Out" className="sign-out-icon" />
+        <button className="sign-out-btn" onClick={handleLogout} title="Sign Out">
+          <span className="nav-item-tooltip">Sign Out</span>
+          <img src="/images/log-out-new.png" alt="Sign Out" className="sign-out-icon" />
         </button>
       </div>
     </div>
