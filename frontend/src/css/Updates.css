@@ -54,7 +54,7 @@
 .updates-card-content:has(.empty-state) {
   border: 2px dashed #e2e8f0;
   border-radius: 4px;
-  display: flex;
+  /* display: flex; */
   align-items: center;
   justify-content: center;
 }
