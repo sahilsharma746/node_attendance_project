@@ -3,8 +3,8 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import '../css/SummaryCards.css';
 
-const ATTENDANCE_API = 'http://localhost:3000/api/attendance';
-const LEAVE_API = 'http://localhost:3000/api/leave';
+const ATTENDANCE_API = process.env.REACT_APP_API_URL + '/api/attendance';
+const LEAVE_API = process.env.REACT_APP_API_URL + '/api/leave';
 
 const SummaryCards = () => {
   const { user } = useAuth();
@@ -114,6 +114,7 @@ const SummaryCards = () => {
           </div>
         </div>
       </div>
+      
 
       {/* <div className="summary-card">
         <div className="card-icon">

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import '../../css/admin/AdminHolidays.css';
 
-const API_BASE = 'http://localhost:3000/api/holidays';
+const API_BASE = process.env.REACT_APP_API_URL + '/api/holidays';
 
 const AdminHolidays = () => {
   const [holidays, setHolidays] = useState([]);

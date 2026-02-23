@@ -120,26 +120,10 @@ const Profile = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="profile-form">
-          {/* <div className="form-group">
-            <label htmlFor="profile-pic-url">Profile picture URL</label>
-            <input
-              id="profile-pic-url"
-              type="url"
-              value={profilePic}
-              onChange={handleUrlChange}
-              placeholder="https://example.com/your-photo.jpg"
-              className="profile-input"
-            />
-          </div> */}
+        
           <div className="form-group">
             <label className="profile-upload-label">
-              <span className="profile-upload-btn">Or choose an image file</span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="profile-file-input"
-              />
+              <span className="profile-upload-btn">Upload an image file</span>
             </label>
           </div>
           <div className="profile-actions">

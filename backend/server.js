@@ -5,7 +5,6 @@ require("dotenv").config();
 
 const app = express();
 
-// Allow larger JSON payloads for profile picture (base64) and similar
 app.use(express.json({ limit: "10mb" }));
 app.use(cors());
 
