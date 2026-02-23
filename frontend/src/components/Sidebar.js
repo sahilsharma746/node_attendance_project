@@ -113,7 +113,6 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
           </NavLink>
         )}
       </nav>
-
       <div className="sidebar-footer">
         <div className="user-profile">
           <div className="user-avatar">

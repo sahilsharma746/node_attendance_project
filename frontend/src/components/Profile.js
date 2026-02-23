@@ -22,10 +22,10 @@ const Profile = () => {
       .slice(0, 2);
   };
 
-  const handleUrlChange = (e) => {
-    setProfilePic(e.target.value.trim());
-    setMessage({ type: '', text: '' });
-  };
+  // const handleUrlChange = (e) => {
+  //   setProfilePic(e.target.value.trim());
+  //   setMessage({ type: '', text: '' });
+  // };
 
   const MAX_SIZE = 400; 
   const JPEG_QUALITY = 0.85;
