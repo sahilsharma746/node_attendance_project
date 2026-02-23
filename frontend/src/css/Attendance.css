@@ -210,7 +210,7 @@
   .attendance-container {
     margin-left: 0;
     padding: 20px;
-    padding-top: 76px; /* space for hamburger */
+    padding-top: 76px;
   }
 
   .attendance-title {
@@ -234,3 +234,106 @@
   }
 }
 
+
+@media (max-width: 1024px) {
+
+  
+  .attendance-table thead {
+    display: none !important;
+  }
+
+  
+  .attendance-table,
+  .attendance-table tbody,
+  .attendance-table tr {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  
+  .attendance-table tr {
+    background: #ffffff !important;
+    border-radius: 16px !important;
+    padding: 14px 16px !important;
+    margin-bottom: 18px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+  }
+
+  
+  .attendance-table td {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 6px 0 !important;
+    font-size: 14px !important;
+  }
+
+  
+  .attendance-table td::before {
+    content: attr(data-label) !important;
+    font-weight: 600 !important;
+    color: #6b7280 !important;
+  }
+
+  
+  .mobile-employee-name {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+  }
+
+ 
+  .status-badge {
+    padding: 4px 10px !important;
+    border-radius: 999px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-transform: capitalize !important;
+  }
+
+  .status-badge.present {
+    background: #dcfce7 !important;
+    color: #166534 !important;
+  }
+
+  .status-badge.late {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+  }
+
+  .status-badge.absent {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+  }
+
+  
+  .attendance-edit-btn {
+    width: 100% !important;
+    margin-top: 10px !important;
+    padding: 10px !important;
+    font-size: 14px !important;
+    border-radius: 10px !important;
+  }
+
+ 
+
+  .attendance-table tr.table-meta-row {
+    display: table-row !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .attendance-table tr.table-meta-row td {
+    display: table-cell !important;
+    text-align: center !important;
+    font-size: 14px !important;
+    padding: 12px !important;
+  }
+
+  .attendance-table tr.table-meta-row td::before {
+    content: none !important;
+  }
+}

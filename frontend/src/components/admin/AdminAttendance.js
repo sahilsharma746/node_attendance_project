@@ -2,8 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import '../../css/admin/AdminAttendance.css';
 
-const API_BASE = 'http://localhost:3000/api/attendance';
-const AUTH_BASE = 'http://localhost:3000/api/auth';
+const API_BASE = process.env.REACT_APP_API_URL + '/api/attendance';
+const AUTH_BASE = process.env.REACT_APP_API_URL + '/api/auth';
+
 
 function timeToInput(dateStrOrDate) {
   if (!dateStrOrDate) return '';
@@ -187,38 +188,69 @@ const AdminAttendance = () => {
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={8} className="loading-cell">Loading...</td>
-                </tr>
-              ) : attendanceRecords.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="empty-cell">No attendance records for this period</td>
-                </tr>
-              ) : (
-                attendanceRecords.map((attendance) => (
-                  <tr key={attendance._id || attendance.date}>
-                    <td>{attendance.user ? attendance.user.name : '-'}</td>
-                    <td>{attendance.date}</td>
-                    <td>{attendance.checkIn}</td>
-                    <td>{attendance.checkOut || '-'}</td>
-                    <td>{attendance.status}</td>
-                    <td>{attendance.lateBy ?? '-'}</td>
-                    <td>{attendance.breaks ?? '-'}</td>
-                    <td>
-                      <button
-                        type="button"
-                        className="attendance-edit-btn"
-                        onClick={() => openEdit(attendance)}
-                      >
-                        Edit
-                      </button>
+              <tbody>
+                {loading ? (
+                  <tr className="table-meta-row">
+                    <td colSpan={8} className="loading-cell">
+                      Loading...
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
+                ) : attendanceRecords.length === 0 ? (
+                  <tr className="table-meta-row">
+                    <td colSpan={8} className="empty-cell">
+                      No attendance records for this period
+                    </td>
+                  </tr>
+                ) : (
+                  attendanceRecords.map((attendance) => (
+                    <tr key={attendance._id || attendance.date}>
+
+                      <td data-label="Employee">
+                        <strong className="mobile-employee-name">
+                          {attendance.user ? attendance.user.name : '-'}
+                        </strong>
+                      </td>
+
+                      <td data-label="Date">
+                        {attendance.date}
+                      </td>
+
+                      <td data-label="Check In">
+                        {attendance.checkIn}
+                      </td>
+
+                      <td data-label="Check Out">
+                        {attendance.checkOut || '-'}
+                      </td>
+
+                      <td data-label="Status">
+                        <span className={`status-badge ${attendance.status?.toLowerCase()}`}>
+                          {attendance.status}
+                        </span>
+                      </td>
+
+                      <td data-label="Late By">
+                        {attendance.lateBy ?? '-'}
+                      </td>
+
+                      <td data-label="Breaks">
+                        {attendance.breaks ?? '-'}
+                      </td>
+
+                      <td data-label="Action">
+                        <button
+                          type="button"
+                          className="attendance-edit-btn"
+                          onClick={() => openEdit(attendance)}
+                        >
+                          Edit
+                        </button>
+                      </td>
+
+                    </tr>
+                  ))
+                )}
+              </tbody>
           </table>
         </div>
       </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../../css/admin/AdminLeaveRequests.css';
 
-const API_BASE = 'http://localhost:3000/api/leave';
+const API_BASE = process.env.REACT_APP_API_URL + '/api/leave';
 
 const formatDisplayDate = (dateStr) => {
   if (!dateStr) return '';
