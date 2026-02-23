@@ -19,14 +19,12 @@ const AdminRoute = ({ children }) => {
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Close the off-canvas sidebar when returning to desktop widths.
   useEffect(() => {
     const mql = window.matchMedia('(min-width: 769px)');
     const onChange = (e) => {
       if (e.matches) setSidebarOpen(false);
     };
 
-    // Safari fallback
     if (mql.addEventListener) mql.addEventListener('change', onChange);
     else mql.addListener(onChange);
 

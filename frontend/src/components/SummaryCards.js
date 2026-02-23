@@ -44,9 +44,9 @@ const SummaryCards = () => {
   const daysPresent = attendanceSummary?.daysPresent ?? 0;
   const lateCount = attendanceSummary?.lateCount ?? 0;
   const daysPresentThisWeek = attendanceSummary?.daysPresentThisWeek ?? 0;
-  const lateCountThisWeek = attendanceSummary?.lateCountThisWeek ?? 0;
-  const casualLeaveRemaining = leaveStats?.remaining ?? 0;
-  const pendingRequests = leaveStats?.pendingCount ?? 0;
+  // const lateCountThisWeek = attendanceSummary?.lateCountThisWeek ?? 0;
+  // const casualLeaveRemaining = leaveStats?.remaining ?? 0;
+  // const pendingRequests = leaveStats?.pendingCount ?? 0;
 
   const weekChangeText =
     daysPresentThisWeek > 0
@@ -77,7 +77,6 @@ const SummaryCards = () => {
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="summary-cards">
