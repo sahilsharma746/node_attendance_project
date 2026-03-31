@@ -36,10 +36,7 @@ async function adminRecordsHandler(req, res) {
         checkInRaw: r.checkIn,
         checkOutRaw: r.checkOut,
         status: attendanceStatus.statusMessage,
-        lateBy: attendanceStatus.lateByFormatted ?? "-",
         breaks: "-",
-        isLate: attendanceStatus.isLate,
-        lateMinutes: attendanceStatus.lateMinutes,
         totalWorkMinutes: attendanceStatus.totalWorkMinutes,
       };
     });
@@ -91,10 +88,7 @@ router.patch("/records/:id", adminAuth, async (req, res) => {
       checkIn: formatTime(populated.checkIn),
       checkOut: populated.checkOut ? formatTime(populated.checkOut) : "",
       status: attendanceStatus.statusMessage,
-      lateBy: attendanceStatus.lateByFormatted ?? "-",
       breaks: "-",
-      isLate: attendanceStatus.isLate,
-      lateMinutes: attendanceStatus.lateMinutes,
       totalWorkMinutes: attendanceStatus.totalWorkMinutes,
     });
   } catch (error) {
@@ -121,8 +115,6 @@ router.get("/history", auth, async (req, res) => {
         checkIn: formatTime(r.checkIn),
         checkOut: r.checkOut ? formatTime(r.checkOut) : "",
         status: attendanceStatus.statusMessage,
-        isLate: attendanceStatus.isLate,
-        lateMinutes: attendanceStatus.lateMinutes,
         totalWorkMinutes: attendanceStatus.totalWorkMinutes,
       };
     });
@@ -247,13 +239,7 @@ router.get("/my-summary", auth, async (req, res) => {
     })
       .lean();
 
-    let daysPresent = 0;
-    let lateCount = 0;
-    for (const r of records) {
-      const status = getAttendanceStatus(r.checkIn, r.checkOut);
-      daysPresent += 1;
-      if (status.isLate) lateCount += 1;
-    }
+    let daysPresent = records.length;
 
     const weekStart = new Date(now);
     weekStart.setDate(now.getDate() - now.getDay());
@@ -267,21 +253,13 @@ router.get("/my-summary", auth, async (req, res) => {
       date: { $gte: weekStart, $lte: weekEnd },
     }).lean();
 
-    let daysPresentThisWeek = 0;
-    let lateCountThisWeek = 0;
-    for (const r of weekRecords) {
-      const status = getAttendanceStatus(r.checkIn, r.checkOut);
-      daysPresentThisWeek += 1;
-      if (status.isLate) lateCountThisWeek += 1;
-    }
+    let daysPresentThisWeek = weekRecords.length;
 
     res.json({
       month,
       year,
       daysPresent,
-      lateCount,
       daysPresentThisWeek,
-      lateCountThisWeek,
     });
   } catch (error) {
     console.error("My summary error:", error);
@@ -306,16 +284,14 @@ router.get("/in-office", auth, async (req, res) => {
       const attendanceStatus = getAttendanceStatus(r.checkIn, r.checkOut);
       return {
         _id: r._id,
-        user: r.user ? { 
+        user: r.user ? {
           _id: r.user._id,
-          name: r.user.name, 
-          email: r.user.email 
+          name: r.user.name,
+          email: r.user.email
         } : null,
         checkIn: formatTime(r.checkIn),
         checkInRaw: r.checkIn,
         status: attendanceStatus.statusMessage,
-        isLate: attendanceStatus.isLate,
-        lateMinutes: attendanceStatus.lateMinutes,
       };
     });
 
@@ -323,40 +299,6 @@ router.get("/in-office", auth, async (req, res) => {
   } catch (error) {
     console.error("In office error:", error);
     res.status(500).json({ msg: "Failed to fetch employees in office" });
-  }
-});
-
-// Admin: today's late arrivals (IST)
-router.get("/late-today", adminAuth, async (req, res) => {
-  try {
-    const now = new Date();
-    const dateStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const dateEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-
-    const records = await Attendance.find({
-      date: { $gte: dateStart, $lte: dateEnd },
-    })
-      .populate("user", "name email")
-      .sort({ checkIn: 1 })
-      .lean();
-
-    const formatted = records
-      .map((r) => {
-        const attendanceStatus = getAttendanceStatus(r.checkIn, r.checkOut);
-        return {
-          _id: r._id,
-          user: r.user ? { _id: r.user._id, name: r.user.name, email: r.user.email } : null,
-          checkIn: formatTime(r.checkIn),
-          lateBy: attendanceStatus.lateByFormatted ?? null,
-          isLate: attendanceStatus.isLate,
-        };
-      })
-      .filter((r) => r.isLate);
-
-    res.json(formatted);
-  } catch (error) {
-    console.error("Late today error:", error);
-    res.status(500).json({ msg: "Failed to fetch late arrivals" });
   }
 });
 
@@ -452,8 +394,6 @@ function formatRecord(r) {
     checkIn: formatTime(r.checkIn),
     checkOut: r.checkOut ? formatTime(r.checkOut) : "",
     status: attendanceStatus.statusMessage,
-    isLate: attendanceStatus.isLate,
-    lateMinutes: attendanceStatus.lateMinutes,
     totalWorkMinutes: attendanceStatus.totalWorkMinutes,
   };
 }

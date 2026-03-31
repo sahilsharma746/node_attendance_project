@@ -176,8 +176,7 @@ const ContentBlocks = () => {
                 });
               };
               const displayStatus = checkInStatus.record?.status || status.statusMessage;
-              const isLate = checkInStatus.record?.isLate || status.isLate;
-              
+
               return (
                 <div className="status-display">
                   <div className="status-icon-large">
@@ -191,10 +190,10 @@ const ContentBlocks = () => {
                       {formatTime(checkInStatus.checkInTime)}
                     </div>
                     {displayStatus && (
-                      <div className="status-message" style={{ 
-                        marginTop: '8px', 
-                        fontSize: '12px', 
-                        color: isLate ? '#dc2626' : '#22c55e',
+                      <div className="status-message" style={{
+                        marginTop: '8px',
+                        fontSize: '12px',
+                        color: '#22c55e',
                         fontWeight: 500
                       }}>
                         {displayStatus}
@@ -337,13 +336,13 @@ const ContentBlocks = () => {
             ) : (
               <ul className="on-leave-list">
                 {employeesInOffice.map((employee) => (
-                  <li key={employee._id} className="on-leave-item" style={{ borderLeftColor: employee.isLate ? '#dc2626' : '#22c55e' }}>
+                  <li key={employee._id} className="on-leave-item" style={{ borderLeftColor: '#22c55e' }}>
                     <span className="on-leave-name">{employee.user?.name || 'Unknown'}</span>
                     <span className="on-leave-meta">
                       Checked in: {employee.checkIn}
                     </span>
-                    <span className="on-leave-meta" style={{ 
-                      color: employee.isLate ? '#dc2626' : '#22c55e',
+                    <span className="on-leave-meta" style={{
+                      color: '#22c55e',
                       fontWeight: 500,
                       marginTop: '2px'
                     }}>
