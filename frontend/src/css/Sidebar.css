@@ -157,10 +157,13 @@
 }
 
 .nav-icon {
-  width: 28px;
-  height: 28px;
-  stroke-width: 2;
-  /* filter: brightness(0) invert(1); */
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .sidebar-footer {
@@ -253,9 +256,12 @@
 }
 
 .sign-out-icon {
-  width: 30px;
-  height: 30px;
-  /* filter: brightness(0) invert(1); */
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 @media (max-width: 768px) {

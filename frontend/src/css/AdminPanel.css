@@ -71,9 +71,13 @@
 .admin-content {
   width: 100%;
 }
-.admin-nav-tab-icon{
-  width: 20px;
-  height: 20px;
+.admin-nav-tab-icon {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
