@@ -27,10 +27,8 @@ const AdminAttendance = () => {
   const [editForm, setEditForm] = useState({ checkInTime: '', checkOutTime: '' });
   const [updateLoading, setUpdateLoading] = useState(false);
   const [error, setError] = useState('');
-  const [lateToday, setLateToday] = useState([]);
   const [summary, setSummary] = useState([]);
   const [summaryLoading, setSummaryLoading] = useState(false);
-  const [lateLoading, setLateLoading] = useState(false);
 
   const fetchRecords = useCallback(async () => {
     setLoading(true);
@@ -60,22 +58,10 @@ const AdminAttendance = () => {
     }
   }, []);
 
+  console.log(users);  
   useEffect(() => {
     fetchRecords();
   }, [fetchRecords]);
-
-  const fetchLateToday = useCallback(async () => {
-    setLateLoading(true);
-    try {
-      const res = await axios.get(`${API_BASE}/late-today`);
-      setLateToday(Array.isArray(res.data) ? res.data : []);
-    } catch (err) {
-      console.error('Failed to fetch late arrivals:', err);
-      setLateToday([]);
-    } finally {
-      setLateLoading(false);
-    }
-  }, []);
 
   const fetchSummary = useCallback(async () => {
     setSummaryLoading(true);
@@ -95,10 +81,6 @@ const AdminAttendance = () => {
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
-
-  useEffect(() => {
-    fetchLateToday();
-  }, [fetchLateToday]);
 
   useEffect(() => {
     fetchSummary();
@@ -141,7 +123,6 @@ const AdminAttendance = () => {
       });
       closeEditModal();
       fetchRecords();
-      fetchLateToday();
     } catch (err) {
       setError(err.response?.data?.msg || 'Failed to update record');
     } finally {
@@ -183,7 +164,6 @@ const AdminAttendance = () => {
                 <th>Check In</th>
                 <th>Check Out</th>
                 <th>Status</th>
-                <th>Late By</th>
                 <th>Breaks</th>
                 <th>Actions</th>
               </tr>
@@ -191,13 +171,13 @@ const AdminAttendance = () => {
               <tbody>
                 {loading ? (
                   <tr className="table-meta-row">
-                    <td colSpan={8} className="loading-cell">
+                    <td colSpan={7} className="loading-cell">
                       Loading...
                     </td>
                   </tr>
                 ) : attendanceRecords.length === 0 ? (
                   <tr className="table-meta-row">
-                    <td colSpan={8} className="empty-cell">
+                    <td colSpan={7} className="empty-cell">
                       No attendance records for this period
                     </td>
                   </tr>
@@ -227,10 +207,6 @@ const AdminAttendance = () => {
                         <span className={`status-badge ${attendance.status?.toLowerCase()}`}>
                           {attendance.status}
                         </span>
-                      </td>
-
-                      <td data-label="Late By">
-                        {attendance.lateBy ?? '-'}
                       </td>
 
                       <td data-label="Breaks">
@@ -295,46 +271,6 @@ const AdminAttendance = () => {
           </div>
         </div>
       )}
-
-      <div className="attendance-card">
-        <div className="card-header-section">
-          <div className="title-with-icon">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M10 18.3333C14.6024 18.3333 18.3333 14.6024 18.3333 10C18.3333 5.39763 14.6024 1.66667 10 1.66667C5.39763 1.66667 1.66667 5.39763 1.66667 10C1.66667 14.6024 5.39763 18.3333 10 18.3333Z" stroke="#374151" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M10 5V10L13.3333 11.6667" stroke="#374151" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <h2 className="section-title">Late Arrivals Today (IST)</h2>
-          </div>
-        </div>
-        {lateLoading ? (
-          <p className="loading-text">Loading...</p>
-        ) : lateToday.length === 0 ? (
-          <div className="empty-late-arrivals">
-            <p>No late arrivals today</p>
-          </div>
-        ) : (
-          <div className="table-container">
-            <table className="attendance-table">
-              <thead>
-                <tr>
-                  <th>Employee</th>
-                  <th>Check In</th>
-                  <th>Late By</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lateToday.map((r) => (
-                  <tr key={r._id}>
-                    <td>{r.user?.name || r.user?.email || '-'}</td>
-                    <td>{r.checkIn}</td>
-                    <td>{r.lateBy ?? '-'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
 
       <div className="attendance-card">
         <div className="card-header-section">

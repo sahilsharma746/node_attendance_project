@@ -25,6 +25,7 @@ const Attendance = () => {
       default: return 'th';
     }
   };
+  console.log(user);  
 
   const getCurrentDate = () => {
     const today = new Date();

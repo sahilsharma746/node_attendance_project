@@ -42,23 +42,12 @@ const SummaryCards = () => {
   }, [fetchDashboardStats]);
 
   const daysPresent = attendanceSummary?.daysPresent ?? 0;
-  const lateCount = attendanceSummary?.lateCount ?? 0;
   const daysPresentThisWeek = attendanceSummary?.daysPresentThisWeek ?? 0;
-  // const lateCountThisWeek = attendanceSummary?.lateCountThisWeek ?? 0;
-  // const casualLeaveRemaining = leaveStats?.remaining ?? 0;
-  // const pendingRequests = leaveStats?.pendingCount ?? 0;
 
   const weekChangeText =
     daysPresentThisWeek > 0
       ? `${daysPresentThisWeek} day${daysPresentThisWeek !== 1 ? 's' : ''} present this week`
       : 'No attendance this week';
-
-  const lateSubtext =
-    lateCount > 0
-      ? lateCount === 1
-        ? '1 late arrival this month'
-        : `${lateCount} late arrivals this month`
-      : 'All on time this month';
 
   if (loading) {
     return (
@@ -102,18 +91,6 @@ const SummaryCards = () => {
         </div>
       </div>
 
-      <div className="summary-card">
-        <div className="card-icon">
-          <img src="/images/wall-clock.png" alt="Late Arrivals" />
-        </div>
-        <div className="card-content">
-          <div className="card-label">Late Arrivals</div>
-          <div className="card-value">{lateCount}</div>
-          <div className={`card-change ${lateCount > 0 ? 'orange' : 'green'}`}>
-            {lateSubtext}
-          </div>
-        </div>
-      </div>
       
 
       {/* <div className="summary-card">
