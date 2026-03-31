@@ -6,7 +6,13 @@ require("dotenv").config();
 const app = express();
 
 app.use(express.json({ limit: "10mb" }));
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:3005",
+    process.env.FRONTEND_URL,
+  ].filter(Boolean),
+  credentials: true,
+}));
 
 connectDB();
 
@@ -20,5 +26,9 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "OK", message: "Server is running" });
 });
 
+const PORT = process.env.PORT || 3004;
 
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
