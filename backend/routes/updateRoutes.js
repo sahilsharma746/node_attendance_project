@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require("../middleware/auth");
 const adminAuth = require("../middleware/auth").adminAuth;
 const Update = require("../models/Update");
+const { notifyAllNewUpdate } = require("../utils/email");
 
 function formatUpdate(doc) {
   const d = doc.toObject ? doc.toObject() : doc;
@@ -50,9 +51,17 @@ router.post("/", adminAuth, async (req, res) => {
     const populated = await Update.findById(update._id)
       .populate("createdBy", "name")
       .lean();
+    const createdByName = populated.createdBy?.name || "Admin";
     res.status(201).json({
       ...formatUpdate(populated),
-      createdByName: populated.createdBy?.name || "Admin",
+      createdByName,
+    });
+
+    // Send email to all employees (non-blocking)
+    notifyAllNewUpdate({
+      title: populated.title,
+      content: populated.content,
+      postedBy: createdByName,
     });
   } catch (error) {
     if (error.name === "ValidationError") {
