@@ -369,6 +369,7 @@ function formatTime(date) {
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
+    timeZone: "Asia/Kolkata",
   });
 }
 
@@ -378,6 +379,7 @@ function formatDisplayDate(date) {
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: "Asia/Kolkata",
   });
 }
 
