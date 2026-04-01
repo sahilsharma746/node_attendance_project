@@ -164,20 +164,19 @@ const AdminAttendance = () => {
                 <th>Check In</th>
                 <th>Check Out</th>
                 <th>Status</th>
-                <th>Breaks</th>
                 <th>Actions</th>
               </tr>
             </thead>
               <tbody>
                 {loading ? (
                   <tr className="table-meta-row">
-                    <td colSpan={7} className="loading-cell">
+                    <td colSpan={6} className="loading-cell">
                       Loading...
                     </td>
                   </tr>
                 ) : attendanceRecords.length === 0 ? (
                   <tr className="table-meta-row">
-                    <td colSpan={7} className="empty-cell">
+                    <td colSpan={6} className="empty-cell">
                       No attendance records for this period
                     </td>
                   </tr>
@@ -207,10 +206,6 @@ const AdminAttendance = () => {
                         <span className={`status-badge ${attendance.status?.toLowerCase()}`}>
                           {attendance.status}
                         </span>
-                      </td>
-
-                      <td data-label="Breaks">
-                        {attendance.breaks ?? '-'}
                       </td>
 
                       <td data-label="Action">

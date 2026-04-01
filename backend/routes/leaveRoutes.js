@@ -206,4 +206,19 @@ router.patch("/admin/:id", adminAuth, async (req, res) => {
   }
 });
 
+router.delete("/admin/:id", adminAuth, async (req, res) => {
+  try {
+    const leave = await Leave.findById(req.params.id);
+    if (!leave) return res.status(404).json({ msg: "Leave request not found" });
+    if (leave.status === "pending") {
+      return res.status(400).json({ msg: "Cannot delete a pending request. Approve or reject it first." });
+    }
+    await Leave.findByIdAndDelete(req.params.id);
+    res.json({ msg: "Leave request deleted" });
+  } catch (error) {
+    console.error("Delete leave error:", error);
+    res.status(500).json({ msg: "Failed to delete leave request" });
+  }
+});
+
 module.exports = router;
