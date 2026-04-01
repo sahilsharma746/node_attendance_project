@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import '../css/Sidebar.css';
+
+const API_BASE = process.env.REACT_APP_API_URL;
 
 const Icons = {
   dashboard: (
@@ -67,6 +70,47 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
   const location = useLocation();
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const [pendingLeaves, setPendingLeaves] = useState(0);
+  const [newUpdates, setNewUpdates] = useState(0);
+
+  const fetchCounts = useCallback(async () => {
+    if (!user) return;
+    try {
+      // Fetch new updates count for all users
+      const updatesRes = await axios.get(`${API_BASE}/api/updates`);
+      const updates = Array.isArray(updatesRes.data) ? updatesRes.data : [];
+      const lastSeenUpdates = localStorage.getItem('lastSeenUpdatesTime');
+      if (lastSeenUpdates) {
+        const unseen = updates.filter(u => new Date(u.createdAt) > new Date(lastSeenUpdates));
+        setNewUpdates(unseen.length);
+      } else {
+        setNewUpdates(updates.length);
+      }
+
+      // Fetch pending leaves count for admin only
+      if (isAdmin()) {
+        const leavesRes = await axios.get(`${API_BASE}/api/leave/admin?status=pending`);
+        const leaves = Array.isArray(leavesRes.data) ? leavesRes.data : [];
+        setPendingLeaves(leaves.length);
+      }
+    } catch (err) {
+      // silently fail
+    }
+  }, [user, isAdmin]);
+
+  useEffect(() => {
+    fetchCounts();
+    const interval = setInterval(fetchCounts, 60000); // refresh every minute
+    return () => clearInterval(interval);
+  }, [fetchCounts]);
+
+  // Mark updates as seen when visiting updates page
+  useEffect(() => {
+    if (location.pathname === '/dashboard/updates') {
+      localStorage.setItem('lastSeenUpdatesTime', new Date().toISOString());
+      setNewUpdates(0);
+    }
+  }, [location.pathname]);
 
   const handleNavClick = () => {
     if (window.innerWidth <= 768) onClose();
@@ -131,7 +175,12 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
           onClick={handleNavClick}
           title="Leave Requests"
         >
-          <span className="nav-icon">{Icons.leave}</span>
+          <span className="nav-icon">
+            {Icons.leave}
+            {isAdmin() && pendingLeaves > 0 && (
+              <span className="nav-badge">{pendingLeaves > 9 ? '9+' : pendingLeaves}</span>
+            )}
+          </span>
           <span className="nav-item-tooltip">Leave Requests</span>
         </NavLink>
         <NavLink
@@ -140,7 +189,12 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
           onClick={handleNavClick}
           title="Updates"
         >
-          <span className="nav-icon">{Icons.updates}</span>
+          <span className="nav-icon">
+            {Icons.updates}
+            {newUpdates > 0 && (
+              <span className="nav-badge">{newUpdates > 9 ? '9+' : newUpdates}</span>
+            )}
+          </span>
           <span className="nav-item-tooltip">Updates</span>
         </NavLink>
         <NavLink
