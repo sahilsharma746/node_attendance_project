@@ -34,10 +34,13 @@ function getAttendanceStatus(checkIn, checkOut) {
   }
 
   const totalWorkMinutes = minutesBetween(cin, cout);
+  const hrs = Math.floor(totalWorkMinutes / 60);
+  const mins = totalWorkMinutes % 60;
+  const workDisplay = hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
 
   return {
     totalWorkMinutes,
-    statusMessage: "Present",
+    statusMessage: `Completed (${workDisplay})`,
   };
 }
 
