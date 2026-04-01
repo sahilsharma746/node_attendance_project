@@ -59,17 +59,44 @@ const AdminLeaveRequests = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this leave request?')) return;
+    setActionLoading(id);
+    setError('');
+    try {
+      await axios.delete(`${API_BASE}/admin/${id}`);
+      fetchAll();
+    } catch (err) {
+      setError(err.response?.data?.msg || 'Failed to delete request');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const setNote = (id, value) => {
     setReviewNote((prev) => ({ ...prev, [id]: value }));
   };
 
-  const renderLeaveItem = (leave, showActions = false) => (
+  const renderLeaveItem = (leave, { showActions = false, showDelete = false } = {}) => (
     <div key={leave._id} className="admin-leave-item">
       <div className="admin-leave-item-header">
         <span className="admin-leave-user">
           {leave.user ? `${leave.user.name} (${leave.user.email})` : 'Unknown'}
         </span>
-        <span className={`admin-leave-status admin-leave-status-${leave.status}`}>{leave.status}</span>
+        <div className="admin-leave-header-right">
+          <span className={`admin-leave-status admin-leave-status-${leave.status}`}>{leave.status}</span>
+          {showDelete && (
+            <button
+              type="button"
+              className="admin-leave-btn admin-leave-btn-delete"
+              onClick={() => handleDelete(leave._id)}
+              disabled={actionLoading === leave._id}
+              title="Delete"
+            >
+              {actionLoading === leave._id ? '...' : 'Clear'}
+            </button>
+          )}
+        </div>
       </div>
       <div className="admin-leave-dates">
         {formatDisplayDate(leave.startDateStr)} – {formatDisplayDate(leave.endDateStr)}
@@ -143,7 +170,7 @@ const AdminLeaveRequests = () => {
             </div>
           ) : (
             <div className="admin-leave-list">
-              {pending.map((leave) => renderLeaveItem(leave, true))}
+              {pending.map((leave) => renderLeaveItem(leave, { showActions: true }))}
             </div>
           )}
         </div>
@@ -169,7 +196,7 @@ const AdminLeaveRequests = () => {
             </div>
           ) : (
             <div className="admin-leave-list">
-              {approved.map((leave) => renderLeaveItem(leave))}
+              {approved.map((leave) => renderLeaveItem(leave, { showDelete: true }))}
             </div>
           )}
         </div>
@@ -195,7 +222,7 @@ const AdminLeaveRequests = () => {
             </div>
           ) : (
             <div className="admin-leave-list">
-              {rejected.map((leave) => renderLeaveItem(leave))}
+              {rejected.map((leave) => renderLeaveItem(leave, { showDelete: true }))}
             </div>
           )}
         </div>

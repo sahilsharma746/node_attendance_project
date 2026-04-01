@@ -245,3 +245,21 @@
 .admin-leave-btn-reject:hover:not(:disabled) {
   background: #dc2626;
 }
+
+.admin-leave-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-leave-btn-delete {
+  background: #f3f4f6;
+  color: #6b7280;
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
+.admin-leave-btn-delete:hover:not(:disabled) {
+  background: #ef4444;
+  color: white;
+}
