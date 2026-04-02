@@ -77,12 +77,10 @@ const MainContent = () => {
 
   return (
     <div className="main-content">
-      <div className="welcome-banner">
-        <p className="welcome-text">Welcome to Cloveode Technologies Pvt Ltd</p>
-      </div>
       <div className="main-header">
         <div className="header-left">
           <h1 className="greeting">{getGreeting()}, {user?.name}</h1>
+          <p className="quote-label">Today's Power Line</p>
           <p className="tagline">{getDailyQuote()}</p>
         </div>
         <div className="header-right">

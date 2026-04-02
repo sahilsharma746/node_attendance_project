@@ -2,23 +2,7 @@
   flex: 1;
   padding: 32px;
   background-color: #f5f7fa;
-  margin-left: var(--sidebar-width);
   min-height: 100vh;
-}
-
-.welcome-banner {
-  background: linear-gradient(135deg, #FE5C63, #ff8a8f);
-  border-radius: 12px;
-  padding: 16px 24px;
-  margin-bottom: 24px;
-}
-
-.welcome-text {
-  color: white;
-  font-size: 18px;
-  font-weight: 700;
-  margin: 0;
-  letter-spacing: 0.5px;
 }
 
 .main-header {
@@ -30,6 +14,15 @@
 
 .header-left {
   flex: 1;
+}
+
+.quote-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #FE5C63;
+  margin: 0 0 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .greeting {
@@ -65,9 +58,8 @@
 
 @media (max-width: 768px) {
   .main-content {
-    margin-left: 0;
     padding: 20px;
-    padding-top: 76px; /* space for hamburger */
+    padding-top: 20px;
   }
 
   .main-header {

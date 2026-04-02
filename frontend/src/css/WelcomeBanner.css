@@ -1,0 +1,90 @@
+.welcome-banner {
+  background: linear-gradient(135deg, #1f2937 0%, #374151 50%, #FE5C63 100%);
+  border-radius: 16px;
+  padding: 28px 32px;
+  margin: 32px 32px 0 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.welcome-banner::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 300px;
+  height: 300px;
+  background: rgba(254, 92, 99, 0.15);
+  border-radius: 50%;
+}
+
+.welcome-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -60%;
+  right: 10%;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+}
+
+.welcome-left {
+  position: relative;
+  z-index: 1;
+}
+
+.welcome-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 500;
+}
+
+.welcome-company {
+  font-size: 24px;
+  font-weight: 800;
+  color: white;
+  margin: 0 0 6px 0;
+  letter-spacing: 0.3px;
+}
+
+.welcome-tagline {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  font-weight: 400;
+}
+
+.welcome-right {
+  position: relative;
+  z-index: 1;
+}
+
+.welcome-icon {
+  font-size: 48px;
+  font-weight: 800;
+  color: rgba(254, 92, 99, 0.6);
+  font-family: monospace;
+}
+
+@media (max-width: 768px) {
+  .welcome-banner {
+    margin: 0 20px;
+    margin-top: 76px;
+    padding: 20px;
+  }
+
+  .welcome-company {
+    font-size: 18px;
+  }
+
+  .welcome-icon {
+    font-size: 36px;
+  }
+}

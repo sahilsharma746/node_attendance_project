@@ -2,7 +2,6 @@
   flex: 1;
   padding: 32px;
   background-color: #f5f5f5;
-  margin-left: var(--sidebar-width);
   min-height: 100vh;
 }
 
@@ -361,7 +360,6 @@
 
 @media (max-width: 768px) {
   .leave-request-container {
-    margin-left: 0;
     padding: 20px;
     padding-top: 76px; /* space for hamburger */
   }

@@ -3,7 +3,6 @@
   padding: 40px;
   background-color: #f5f7fa;
   min-height: 100vh;
-  margin-left: var(--sidebar-width);
 }
 
 .admin-header {
@@ -67,6 +66,7 @@
 .admin-nav-tab.active svg {
   stroke: white;
 }
+
 
 .admin-content {
   width: 100%;
