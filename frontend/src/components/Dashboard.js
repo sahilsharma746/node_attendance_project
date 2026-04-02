@@ -11,6 +11,7 @@ import AttendanceSheet from './AttendanceSheet';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../css/Dashboard.css';
+import '../css/WelcomeBanner.css';
 
 const AdminRoute = ({ children }) => {
   const { isAdmin } = useAuth();
@@ -58,7 +59,19 @@ const Dashboard = () => {
         onClick={() => setSidebarOpen(false)}
       />
 
-      <Routes>
+      <div className="dashboard-content">
+        <div className="welcome-banner">
+          <div className="welcome-left">
+            <p className="welcome-label">Welcome to</p>
+            <h2 className="welcome-company">Cloveode Technologies Pvt Ltd</h2>
+            <p className="welcome-tagline">Software & Web Development Company</p>
+          </div>
+          <div className="welcome-right">
+            <span className="welcome-icon">&#60;/&#62;</span>
+          </div>
+        </div>
+
+        <Routes>
         <Route index element={<MainContent />} />
         <Route path="attendance" element={<Attendance />} />
         <Route path="attendance-sheet" element={<AttendanceSheet />} />
@@ -75,6 +88,7 @@ const Dashboard = () => {
           }
         />
       </Routes>
+      </div>
     </div>
   );
 };
