@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import '../css/AttendanceSheet.css';
 
-const SHEET_CSV_URL = process.env.REACT_APP_SHEET_CSV_URL;
+const BASE_CSV_URL = process.env.REACT_APP_SHEET_CSV_URL;
 
-const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-];
-
-const SHORT_MONTHS = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+// Each sheet tab (month) has its own gid
+const SHEET_TABS = [
+  { gid: '0', label: 'Jul 2025' },
+  { gid: '729447152', label: 'Aug 2025' },
+  { gid: '227034736', label: 'Sep 2025' },
+  { gid: '1435744892', label: 'Oct 2025' },
+  { gid: '89673042', label: 'Nov 2025' },
+  { gid: '1692149705', label: 'Dec 2025' },
+  { gid: '1522708638', label: 'Jan 2026' },
+  { gid: '785195875', label: 'Feb 2026' },
+  { gid: '1743297083', label: 'Mar 2026' },
+  { gid: '2030559275', label: 'Apr 2026' },
+  { gid: '82450032', label: 'May 2026' },
 ];
 
 const parseCSV = (text) => {
@@ -40,17 +45,6 @@ const parseCSV = (text) => {
   return { headers, rows };
 };
 
-const parseMonthFromHeader = (header) => {
-  // Handles formats like "01-Apr", "1-Apr", "01-Jul", "1-January", etc.
-  const match = header.match(/\d{1,2}[- /](.*)/);
-  if (!match) return null;
-  const monthStr = match[1].trim();
-  const idx = SHORT_MONTHS.findIndex(
-    (m) => monthStr.toLowerCase().startsWith(m.toLowerCase())
-  );
-  return idx !== -1 ? idx : null;
-};
-
 const categorize = (value) => {
   if (!value) return null;
   const v = value.toUpperCase().trim();
@@ -64,33 +58,61 @@ const categorize = (value) => {
 };
 
 const AttendanceSheet = () => {
+  const [selectedTab, setSelectedTab] = useState(null);
   const [headers, setHeaders] = useState([]);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedMonth, setSelectedMonth] = useState(null);
-  const [view, setView] = useState('summary'); // 'summary' or 'daily'
+  const [view, setView] = useState('summary');
 
+  // Auto-select the current or latest month on mount
   useEffect(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth(); // 0-based
+    const currentYear = now.getFullYear();
+
+    // Try to find matching tab for current month
+    const monthMap = { 'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5, 'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11 };
+    let bestIdx = SHEET_TABS.length - 1; // default to last tab
+
+    for (let i = 0; i < SHEET_TABS.length; i++) {
+      const parts = SHEET_TABS[i].label.split(' ');
+      const tabMonth = monthMap[parts[0]];
+      const tabYear = parseInt(parts[1]);
+      if (tabYear === currentYear && tabMonth === currentMonth) {
+        bestIdx = i;
+        break;
+      }
+    }
+    setSelectedTab(bestIdx);
+  }, []);
+
+  // Fetch CSV when tab changes
+  useEffect(() => {
+    if (selectedTab === null) return;
+
     const fetchData = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const res = await fetch(SHEET_CSV_URL);
+        const gid = SHEET_TABS[selectedTab].gid;
+        const url = `${BASE_CSV_URL}&gid=${gid}`;
+        const res = await fetch(url);
         if (!res.ok) throw new Error('Failed to fetch attendance data');
         const text = await res.text();
         const { headers, rows } = parseCSV(text);
-        setHeaders(headers);
-        setRows(rows);
 
-        // Auto-select the latest month
-        const months = new Set();
-        headers.slice(1).forEach((h) => {
-          const m = parseMonthFromHeader(h);
-          if (m !== null) months.add(m);
-        });
-        const monthArr = [...months];
-        if (monthArr.length > 0) {
-          setSelectedMonth(monthArr[monthArr.length - 1]);
-        }
+        // Filter out summary columns (Total P, Total A, etc.) and empty rows
+        const dateHeaders = headers.filter((h) => /^\d{1,2}-/.test(h));
+        const nameIdx = 0;
+        const dateIndices = dateHeaders.map((dh) => headers.indexOf(dh));
+
+        setHeaders(['Name', ...dateHeaders]);
+        setRows(
+          rows
+            .filter((r) => r[nameIdx] && r[nameIdx].trim())
+            .map((r) => [r[nameIdx], ...dateIndices.map((di) => r[di] || '')])
+        );
       } catch (err) {
         setError(err.message);
       } finally {
@@ -98,61 +120,26 @@ const AttendanceSheet = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [selectedTab]);
 
-  // Get available months from headers
-  const availableMonths = [];
-  const seenMonths = new Set();
-  headers.slice(1).forEach((h) => {
-    const m = parseMonthFromHeader(h);
-    if (m !== null && !seenMonths.has(m)) {
-      seenMonths.add(m);
-      availableMonths.push(m);
-    }
-  });
-
-  // Get column indices for selected month
-  const getMonthColumns = (month) => {
-    const cols = [];
-    headers.forEach((h, i) => {
-      if (i === 0) return;
-      if (parseMonthFromHeader(h) === month) cols.push(i);
-    });
-    return cols;
-  };
-
-  // Build summary data for selected month
-  const buildSummary = (month) => {
-    const cols = getMonthColumns(month);
-    const totalDays = cols.length;
-
+  // Build summary from current data
+  const buildSummary = () => {
     return rows.map((row) => {
-      const name = row[0] || '';
-      let present = 0, absent = 0, wfh = 0, leave = 0, holiday = 0, other = 0;
+      const name = row[0];
+      let present = 0, absent = 0, wfh = 0, leave = 0, holiday = 0;
+      const totalDays = row.length - 1;
 
-      cols.forEach((ci) => {
-        const cat = categorize(row[ci]);
+      for (let i = 1; i < row.length; i++) {
+        const cat = categorize(row[i]);
         if (cat === 'present') present++;
         else if (cat === 'absent') absent++;
         else if (cat === 'wfh') wfh++;
         else if (cat === 'leave') leave++;
         else if (cat === 'holiday') holiday++;
-        else if (cat === 'other') other++;
-      });
+      }
 
-      return { name, totalDays, present, absent, wfh, leave, holiday, other };
-    }).filter((r) => r.name);
-  };
-
-  // Build daily data for selected month
-  const getDailyData = (month) => {
-    const cols = getMonthColumns(month);
-    const dayHeaders = cols.map((ci) => headers[ci]);
-    const dayRows = rows.map((row) => ({
-      name: row[0] || '',
-      days: cols.map((ci) => row[ci] || ''),
-    })).filter((r) => r.name);
-    return { dayHeaders, dayRows };
+      return { name, totalDays, present, absent, wfh, leave, holiday };
+    });
   };
 
   const getCellClass = (value) => {
@@ -165,49 +152,24 @@ const AttendanceSheet = () => {
     return '';
   };
 
-  if (loading) {
-    return (
-      <div className="sheet-container">
-        <div className="sheet-loading">Loading attendance data...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="sheet-container">
-        <div className="sheet-error">
-          <p>Failed to load attendance data.</p>
-          <p>{error}</p>
-          <button onClick={() => window.location.reload()} className="sheet-retry-btn">
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const summary = selectedMonth !== null ? buildSummary(selectedMonth) : [];
-  const daily = selectedMonth !== null ? getDailyData(selectedMonth) : { dayHeaders: [], dayRows: [] };
+  const summary = buildSummary();
 
   return (
     <div className="sheet-container">
       <div className="sheet-header">
-        <div>
-          <h1 className="sheet-title">Attendance Sheet</h1>
-          <p className="sheet-subtitle">Team attendance overview</p>
-        </div>
+        <h1 className="sheet-title">Attendance Sheet</h1>
+        <p className="sheet-subtitle">Team attendance overview</p>
       </div>
 
       {/* Month Tabs */}
       <div className="month-tabs">
-        {availableMonths.map((m) => (
+        {SHEET_TABS.map((tab, i) => (
           <button
-            key={m}
-            className={`month-tab ${selectedMonth === m ? 'active' : ''}`}
-            onClick={() => setSelectedMonth(m)}
+            key={tab.gid}
+            className={`month-tab ${selectedTab === i ? 'active' : ''}`}
+            onClick={() => setSelectedTab(i)}
           >
-            {MONTH_NAMES[m]}
+            {tab.label}
           </button>
         ))}
       </div>
@@ -237,9 +199,19 @@ const AttendanceSheet = () => {
         <span className="legend-item"><span className="legend-dot holiday"></span> Holiday</span>
       </div>
 
-      {selectedMonth !== null && view === 'summary' && (
+      {loading ? (
+        <div className="sheet-loading">Loading attendance data...</div>
+      ) : error ? (
+        <div className="sheet-error">
+          <p>Failed to load attendance data.</p>
+          <p>{error}</p>
+          <button onClick={() => setSelectedTab(selectedTab)} className="sheet-retry-btn">
+            Retry
+          </button>
+        </div>
+      ) : view === 'summary' ? (
         <div className="sheet-card">
-          <h2 className="card-title">{MONTH_NAMES[selectedMonth]} — Summary</h2>
+          <h2 className="card-title">{SHEET_TABS[selectedTab]?.label} — Summary</h2>
           <div className="sheet-table-wrapper">
             <table className="sheet-table summary-table">
               <thead>
@@ -275,32 +247,30 @@ const AttendanceSheet = () => {
             </table>
           </div>
         </div>
-      )}
-
-      {selectedMonth !== null && view === 'daily' && (
+      ) : (
         <div className="sheet-card">
-          <h2 className="card-title">{MONTH_NAMES[selectedMonth]} — Daily Attendance</h2>
+          <h2 className="card-title">{SHEET_TABS[selectedTab]?.label} — Daily Attendance</h2>
           <div className="sheet-table-wrapper">
             <table className="sheet-table">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  {daily.dayHeaders.map((h, i) => (
+                  {headers.map((h, i) => (
                     <th key={i}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {daily.dayRows.length === 0 ? (
+                {rows.length === 0 ? (
                   <tr>
-                    <td colSpan={daily.dayHeaders.length + 1} className="sheet-empty">No data found</td>
+                    <td colSpan={headers.length} className="sheet-empty">No data found</td>
                   </tr>
                 ) : (
-                  daily.dayRows.map((r, ri) => (
+                  rows.map((row, ri) => (
                     <tr key={ri}>
-                      <td className="cell-name">{r.name}</td>
-                      {r.days.map((d, di) => (
-                        <td key={di} className={getCellClass(d)}>{d}</td>
+                      {row.map((cell, ci) => (
+                        <td key={ci} className={ci > 0 ? getCellClass(cell) : 'cell-name'}>
+                          {cell}
+                        </td>
                       ))}
                     </tr>
                   ))
