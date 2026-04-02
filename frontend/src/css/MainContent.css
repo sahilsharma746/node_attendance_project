@@ -6,6 +6,21 @@
   min-height: 100vh;
 }
 
+.welcome-banner {
+  background: linear-gradient(135deg, #FE5C63, #ff8a8f);
+  border-radius: 12px;
+  padding: 16px 24px;
+  margin-bottom: 24px;
+}
+
+.welcome-text {
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
 .main-header {
   display: flex;
   justify-content: space-between;
