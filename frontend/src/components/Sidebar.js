@@ -24,6 +24,15 @@ const Icons = {
       <path d="M9 16l2 2 4-4" />
     </svg>
   ),
+  attendanceSheet: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <line x1="3" y1="9" x2="21" y2="9" />
+      <line x1="3" y1="15" x2="21" y2="15" />
+      <line x1="9" y1="3" x2="9" y2="21" />
+      <line x1="15" y1="3" x2="15" y2="21" />
+    </svg>
+  ),
   leave: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -70,7 +79,6 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
   const location = useLocation();
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const [pendingLeaves, setPendingLeaves] = useState(0);
   const [newUpdates, setNewUpdates] = useState(0);
 
   const fetchCounts = useCallback(async () => {
@@ -87,16 +95,10 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
         setNewUpdates(updates.length);
       }
 
-      // Fetch pending leaves count for admin only
-      if (isAdmin()) {
-        const leavesRes = await axios.get(`${API_BASE}/api/leave/admin?status=pending`);
-        const leaves = Array.isArray(leavesRes.data) ? leavesRes.data : [];
-        setPendingLeaves(leaves.length);
-      }
     } catch (err) {
       // silently fail
     }
-  }, [user, isAdmin]);
+  }, [user]);
 
   useEffect(() => {
     fetchCounts();
@@ -170,17 +172,21 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
           <span className="nav-item-tooltip">My Attendance</span>
         </NavLink>
         <NavLink
+          to="/dashboard/attendance-sheet"
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+          onClick={handleNavClick}
+          title="Attendance Sheet"
+        >
+          <span className="nav-icon">{Icons.attendanceSheet}</span>
+          <span className="nav-item-tooltip">Attendance Sheet</span>
+        </NavLink>
+        <NavLink
           to="/dashboard/leave-request"
           className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
           onClick={handleNavClick}
           title="Leave Requests"
         >
-          <span className="nav-icon">
-            {Icons.leave}
-            {isAdmin() && pendingLeaves > 0 && (
-              <span className="nav-badge">{pendingLeaves > 9 ? '9+' : pendingLeaves}</span>
-            )}
-          </span>
+          <span className="nav-icon">{Icons.leave}</span>
           <span className="nav-item-tooltip">Leave Requests</span>
         </NavLink>
         <NavLink
