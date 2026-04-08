@@ -4,7 +4,6 @@ const auth = require("../middleware/auth");
 const adminAuth = require("../middleware/auth").adminAuth;
 const Leave = require("../models/Leave");
 const User = require("../models/User");
-const { notifyAdminsLeaveRequest } = require("../utils/email");
 
 const CASUAL_LEAVE_PER_YEAR = 24;
 
@@ -15,7 +14,7 @@ function formatLeave(leave, includeUser = false) {
   const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
   const out = {
     _id: doc._id,
-    type: doc.type,
+    type: doc.type, 
     startDate: doc.startDate,
     endDate: doc.endDate,
     startDateStr: start.toISOString().slice(0, 10),
@@ -63,17 +62,6 @@ router.post("/", auth, async (req, res) => {
       status: "pending",
     });
     res.status(201).json(formatLeave(leave));
-
-    // Send email to admins (non-blocking)
-    User.findById(userId).select("name").lean().then((u) => {
-      notifyAdminsLeaveRequest({
-        employeeName: u?.name || "An employee",
-        type: leave.type,
-        startDate: leave.startDate,
-        endDate: leave.endDate,
-        reason: leave.reason,
-      });
-    });
   } catch (error) {
     if (error.message && error.message.includes("End date")) {
       return res.status(400).json({ msg: error.message });
