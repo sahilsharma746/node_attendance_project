@@ -3,7 +3,6 @@ const router = express.Router();
 const auth = require("../middleware/auth");
 const adminAuth = require("../middleware/auth").adminAuth;
 const Update = require("../models/Update");
-const { notifyAllNewUpdate } = require("../utils/email");
 
 function formatUpdate(doc) {
   const d = doc.toObject ? doc.toObject() : doc;
@@ -57,12 +56,6 @@ router.post("/", adminAuth, async (req, res) => {
       createdByName,
     });
 
-    // Send email to all employees (non-blocking)
-    notifyAllNewUpdate({
-      title: populated.title,
-      content: populated.content,
-      postedBy: createdByName,
-    });
   } catch (error) {
     if (error.name === "ValidationError") {
       const firstMsg = Object.values(error.errors)[0]?.message || error.message;
