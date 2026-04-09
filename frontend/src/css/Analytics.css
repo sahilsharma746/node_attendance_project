@@ -72,6 +72,75 @@
   margin: 0 0 16px 0;
 }
 
+/* Source Toggle */
+.analytics-source-toggle {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  background: #1f2937;
+  border-radius: 10px;
+  padding: 4px;
+  width: fit-content;
+}
+
+.analytics-source-btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #9ca3af;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.analytics-source-btn.active {
+  background: #FE5C63;
+  color: white;
+  box-shadow: 0 2px 8px rgba(254, 92, 99, 0.3);
+}
+
+.analytics-source-btn:hover:not(.active) {
+  color: #e5e7eb;
+}
+
+/* Employee Filter */
+.analytics-filter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.filter-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.filter-select {
+  padding: 8px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  background: white;
+  cursor: pointer;
+  outline: none;
+  min-width: 180px;
+}
+
+.filter-select:focus {
+  border-color: #FE5C63;
+}
+
+/* Full-width card */
+.analytics-card-full {
+  grid-column: 1 / -1;
+}
+
 @media (max-width: 1024px) {
   .analytics-stats {
     grid-template-columns: repeat(2, 1fr);
@@ -98,5 +167,25 @@
 
   .analytics-card {
     padding: 16px;
+  }
+
+  .analytics-source-toggle {
+    width: 100%;
+  }
+
+  .analytics-source-btn {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .analytics-filter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .filter-select {
+    width: 100%;
   }
 }
