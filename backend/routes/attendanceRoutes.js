@@ -302,6 +302,67 @@ router.get("/in-office", auth, async (req, res) => {
   }
 });
 
+// All employees attendance for a month (read-only, for attendance sheet page)
+router.get("/team-monthly", auth, async (req, res) => {
+  try {
+    const now = new Date();
+    const month = Number(req.query.month) || now.getMonth() + 1;
+    const year = Number(req.query.year) || now.getFullYear();
+    const start = new Date(year, month - 1, 1);
+    const end = new Date(year, month, 0, 23, 59, 59, 999);
+    const daysInMonth = new Date(year, month, 0).getDate();
+
+    const [allUsers, records] = await Promise.all([
+      User.find({}).select("_id name email").lean(),
+      Attendance.find({ date: { $gte: start, $lte: end } })
+        .populate("user", "name email")
+        .lean(),
+    ]);
+
+    // Build a map: userId -> { dayNumber -> record }
+    const userMap = {};
+    allUsers.forEach((u) => {
+      userMap[u._id.toString()] = {
+        user: { _id: u._id, name: u.name || u.email, email: u.email },
+        days: {},
+        totalPresent: 0,
+        totalHours: 0,
+      };
+    });
+
+    records.forEach((r) => {
+      const uid = r.user?._id?.toString() || r.user?.toString();
+      if (!uid || !userMap[uid]) return;
+      const day = new Date(r.date).getDate();
+      const status = getAttendanceStatus(r.checkIn, r.checkOut);
+      userMap[uid].days[day] = {
+        present: true,
+        checkIn: formatTime(r.checkIn),
+        checkOut: r.checkOut ? formatTime(r.checkOut) : "",
+        workHours: Math.round((status.totalWorkMinutes / 60) * 10) / 10,
+      };
+      userMap[uid].totalPresent++;
+      userMap[uid].totalHours += status.totalWorkMinutes / 60;
+    });
+
+    const result = Object.values(userMap).map((entry) => ({
+      ...entry,
+      totalHours: Math.round(entry.totalHours * 10) / 10,
+    }));
+
+    res.json({
+      month,
+      year,
+      daysInMonth,
+      workingDays: getWorkingDaysInMonth(month, year),
+      employees: result,
+    });
+  } catch (error) {
+    console.error("Team monthly error:", error);
+    res.status(500).json({ msg: "Failed to fetch team attendance" });
+  }
+});
+
 // Analytics: weekly attendance & work hours for the logged-in user (last 12 weeks)
 router.get("/analytics", auth, async (req, res) => {
   try {
