@@ -39,7 +39,7 @@ const Analytics = () => {
   if (loading) {
     return (
       <div className="analytics-page">
-        <h2 className="analytics-title">Analytics</h2>
+        {/* <h2 className="analytics-title">Analytics</h2> */}
         <div className="analytics-loading">Loading analytics...</div>
       </div>
     );
@@ -48,7 +48,7 @@ const Analytics = () => {
   if (error) {
     return (
       <div className="analytics-page">
-        <h2 className="analytics-title">Analytics</h2>
+        {/* <h2 className="analytics-title">Analytics</h2> */}
         <div className="analytics-error">{error}</div>
       </div>
     );
