@@ -41,7 +41,8 @@ const Attendance = () => {
       hour: '2-digit',
       minute: '2-digit',
       hour12: true,
-    });
+      timeZone: 'Asia/Kolkata',
+    }) + ' IST';
   };
 
   const fetchTodayAndHistory = useCallback(async () => {
