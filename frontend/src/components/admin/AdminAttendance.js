@@ -120,8 +120,8 @@ const AdminAttendance = () => {
     setError('');
     try {
       const dateStr = editingRecord.dateStr;
-      const checkIn = `${dateStr}T${editForm.checkInTime}:00`;
-      const checkOut = editForm.checkOutTime ? `${dateStr}T${editForm.checkOutTime}:00` : null;
+      const checkIn = `${dateStr}T${editForm.checkInTime}:00+05:30`;
+      const checkOut = editForm.checkOutTime ? `${dateStr}T${editForm.checkOutTime}:00+05:30` : null;
       await axios.patch(`${API_BASE}/records/${editingRecord._id}`, {
         checkIn,
         checkOut,
