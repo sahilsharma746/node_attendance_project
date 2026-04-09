@@ -228,7 +228,7 @@ const Analytics = () => {
       sheetData.forEach((m) => {
         const emp = m.employees[name];
         if (emp) {
-          totalPresent += emp.present + emp.wfh;
+          totalPresent += emp.present;
           totalDays += emp.totalDays;
         }
       });
