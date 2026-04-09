@@ -18,14 +18,20 @@ const EMPLOYEE_COLORS = [
   '#84cc16', '#e11d48', '#0ea5e9', '#a855f7', '#10b981',
 ];
 
-// Last 5 months of Google Sheet tabs (Dec 2025 - Apr 2026)
+// Last 9 months of Google Sheet tabs (Aug 2025 - Apr 2026)
 const SHEET_MONTHS = [
+  { gid: '729447152', label: 'Aug 2025', short: 'Aug' },
+  { gid: '227034736', label: 'Sep 2025', short: 'Sep' },
+  { gid: '1435744892', label: 'Oct 2025', short: 'Oct' },
+  { gid: '89673042', label: 'Nov 2025', short: 'Nov' },
   { gid: '1692149705', label: 'Dec 2025', short: 'Dec' },
   { gid: '1522708638', label: 'Jan 2026', short: 'Jan' },
   { gid: '785195875', label: 'Feb 2026', short: 'Feb' },
   { gid: '1743297083', label: 'Mar 2026', short: 'Mar' },
   { gid: '2030559275', label: 'Apr 2026', short: 'Apr' },
 ];
+
+const EXCLUDED_EMPLOYEES = ['akash'];
 
 const parseCSV = (text) => {
   const lines = text.split('\n').filter((line) => line.trim());
@@ -93,7 +99,7 @@ const Analytics = () => {
     }
   }, [user]);
 
-  // Fetch Google Sheet data for last 5 months
+  // Fetch Google Sheet data for last 9 months
   const fetchSheetData = useCallback(async () => {
     setSheetLoading(true);
     setSheetError(null);
@@ -114,6 +120,7 @@ const Analytics = () => {
         rows.forEach((row) => {
           const name = row[nameIdx]?.trim();
           if (!name) return;
+          if (EXCLUDED_EMPLOYEES.some((ex) => name.toLowerCase().includes(ex.toLowerCase()))) return;
           let present = 0, absent = 0, wfh = 0, leave = 0, holiday = 0;
           const totalDays = dateIndices.length;
 
@@ -335,7 +342,7 @@ const Analytics = () => {
 
   // Render Google Sheet analytics
   const renderSheet = () => {
-    if (sheetLoading) return <div className="analytics-loading">Loading Google Sheet data for last 5 months...</div>;
+    if (sheetLoading) return <div className="analytics-loading">Loading Google Sheet data for last 9 months...</div>;
     if (sheetError) return <div className="analytics-error">{sheetError}</div>;
     if (!sheetData) return null;
 
@@ -386,7 +393,7 @@ const Analytics = () => {
         <div className="analytics-stats">
           <div className="analytics-stat-card">
             <div className="stat-value">{selStats.rate}%</div>
-            <div className="stat-label">Attendance Rate (5 months)</div>
+            <div className="stat-label">Attendance Rate (9 months)</div>
           </div>
           <div className="analytics-stat-card">
             <div className="stat-value">{selStats.present}</div>
