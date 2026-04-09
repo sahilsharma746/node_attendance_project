@@ -131,7 +131,7 @@ router.post("/check-in", auth, async (req, res) => {
   try {
     const userId = req.user.id;
     const now = new Date();
-    const dateStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const dateStart = getISTDateStart(now);
 
     const existing = await Attendance.findOne({
       user: userId,
@@ -166,7 +166,7 @@ router.post("/check-out", auth, async (req, res) => {
   try {
     const userId = req.user.id;
     const now = new Date();
-    const dateStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const dateStart = getISTDateStart(now);
 
     const record = await Attendance.findOne({
       user: userId,
@@ -202,7 +202,7 @@ router.get("/today", auth, async (req, res) => {
   try {
     const userId = req.user.id;
     const now = new Date();
-    const dateStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const dateStart = getISTDateStart(now);
 
     const record = await Attendance.findOne({
       user: userId,
@@ -270,7 +270,7 @@ router.get("/my-summary", auth, async (req, res) => {
 router.get("/in-office", auth, async (req, res) => {
   try {
     const now = new Date();
-    const dateStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const dateStart = getISTDateStart(now);
 
     const records = await Attendance.find({
       date: dateStart,
@@ -455,13 +455,20 @@ function getWorkingDaysInMonth(month, year) {
   return count;
 }
 
+function getISTDateStart(now) {
+  // Convert any date to IST "start of day" (midnight IST)
+  const istStr = now.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }); // YYYY-MM-DD
+  return new Date(istStr + "T00:00:00+05:30");
+}
+
 function formatTime(date) {
-  return new Date(date).toLocaleTimeString("en-US", {
+  const time = new Date(date).toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
     timeZone: "Asia/Kolkata",
   });
+  return time + " IST";
 }
 
 function formatDisplayDate(date) {

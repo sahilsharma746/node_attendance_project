@@ -10,9 +10,14 @@ function timeToInput(dateStrOrDate) {
   if (!dateStrOrDate) return '';
   const d = new Date(dateStrOrDate);
   if (Number.isNaN(d.getTime())) return '';
-  const h = d.getHours();
-  const m = d.getMinutes();
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  // Convert to IST for the time input
+  const istStr = d.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'Asia/Kolkata',
+  });
+  return istStr;
 }
 
 const AdminAttendance = () => {
