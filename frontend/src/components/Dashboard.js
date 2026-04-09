@@ -8,6 +8,7 @@ import Organizations from './Organizations';
 import Profile from './Profile';
 import AdminPanel from './AdminPanel';
 import AttendanceSheet from './AttendanceSheet';
+import Analytics from './Analytics';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../css/Dashboard.css';
@@ -75,6 +76,7 @@ const Dashboard = () => {
         <Route index element={<MainContent />} />
         <Route path="attendance" element={<Attendance />} />
         <Route path="attendance-sheet" element={<AttendanceSheet />} />
+        <Route path="analytics" element={<Analytics />} />
         <Route path="leave-request" element={<LeaveRequest />} />
         <Route path="updates" element={<Updates />} />
         <Route path="organizations" element={<Organizations />} />

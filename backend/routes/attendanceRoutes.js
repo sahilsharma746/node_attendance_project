@@ -302,6 +302,97 @@ router.get("/in-office", auth, async (req, res) => {
   }
 });
 
+// Analytics: weekly attendance & work hours for the logged-in user (last 12 weeks)
+router.get("/analytics", auth, async (req, res) => {
+  try {
+    const now = new Date();
+    const userId = req.user.id;
+
+    // --- Last 7 days daily data ---
+    const sevenDaysAgo = new Date(now);
+    sevenDaysAgo.setDate(now.getDate() - 6);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+
+    const dailyRecords = await Attendance.find({
+      user: userId,
+      date: { $gte: sevenDaysAgo },
+    }).sort({ date: 1 }).lean();
+
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const dailyData = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      d.setHours(0, 0, 0, 0);
+      const dateStr = d.toISOString().slice(0, 10);
+      const record = dailyRecords.find(
+        (r) => new Date(r.date).toISOString().slice(0, 10) === dateStr
+      );
+      const workHours = record
+        ? getAttendanceStatus(record.checkIn, record.checkOut).totalWorkMinutes / 60
+        : 0;
+      dailyData.push({
+        day: dayNames[d.getDay()],
+        date: dateStr,
+        present: record ? 1 : 0,
+        workHours: Math.round(workHours * 10) / 10,
+      });
+    }
+
+    // --- Monthly attendance for current year (last 6 months) ---
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthlyData = [];
+    for (let i = 5; i >= 0; i--) {
+      const m = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const mEnd = new Date(m.getFullYear(), m.getMonth() + 1, 0, 23, 59, 59, 999);
+      const count = await Attendance.countDocuments({
+        user: userId,
+        date: { $gte: m, $lte: mEnd },
+      });
+      const workingDays = getWorkingDaysInMonth(m.getMonth() + 1, m.getFullYear());
+      monthlyData.push({
+        month: monthNames[m.getMonth()],
+        present: count,
+        workingDays,
+        absent: Math.max(0, workingDays - count),
+      });
+    }
+
+    // --- Average work hours per day of week (last 30 days) ---
+    const thirtyDaysAgo = new Date(now);
+    thirtyDaysAgo.setDate(now.getDate() - 30);
+    thirtyDaysAgo.setHours(0, 0, 0, 0);
+
+    const recentRecords = await Attendance.find({
+      user: userId,
+      date: { $gte: thirtyDaysAgo },
+    }).lean();
+
+    const dayHours = {};
+    const dayCounts = {};
+    dayNames.forEach((d) => { dayHours[d] = 0; dayCounts[d] = 0; });
+
+    recentRecords.forEach((r) => {
+      const dayName = dayNames[new Date(r.date).getDay()];
+      const hours = getAttendanceStatus(r.checkIn, r.checkOut).totalWorkMinutes / 60;
+      if (hours > 0) {
+        dayHours[dayName] += hours;
+        dayCounts[dayName] += 1;
+      }
+    });
+
+    const avgHoursByDay = dayNames.map((d) => ({
+      day: d,
+      avgHours: dayCounts[d] > 0 ? Math.round((dayHours[d] / dayCounts[d]) * 10) / 10 : 0,
+    }));
+
+    res.json({ dailyData, monthlyData, avgHoursByDay });
+  } catch (error) {
+    console.error("Analytics error:", error);
+    res.status(500).json({ msg: "Failed to fetch analytics" });
+  }
+});
+
 // Admin: attendance summary for a month (days present, days on leave, total working days)
 router.get("/summary", adminAuth, async (req, res) => {
   try {
