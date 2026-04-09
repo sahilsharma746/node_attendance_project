@@ -33,6 +33,13 @@ const Icons = {
       <line x1="15" y1="3" x2="15" y2="21" />
     </svg>
   ),
+  analytics: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="20" x2="18" y2="10" />
+      <line x1="12" y1="20" x2="12" y2="4" />
+      <line x1="6" y1="20" x2="6" y2="14" />
+    </svg>
+  ),
   leave: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -179,6 +186,15 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
         >
           <span className="nav-icon">{Icons.attendanceSheet}</span>
           <span className="nav-item-tooltip">Attendance Sheet</span>
+        </NavLink>
+        <NavLink
+          to="/dashboard/analytics"
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+          onClick={handleNavClick}
+          title="Analytics"
+        >
+          <span className="nav-icon">{Icons.analytics}</span>
+          <span className="nav-item-tooltip">Analytics</span>
         </NavLink>
         <NavLink
           to="/dashboard/leave-request"
