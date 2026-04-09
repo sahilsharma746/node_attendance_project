@@ -416,7 +416,7 @@ const Analytics = () => {
         <div className="analytics-grid">
           {/* Monthly comparison - all employees */}
           <div className="analytics-card analytics-card-full">
-            <h3>Monthly Attendance — All Employees (Last 5 Months)</h3>
+            <h3>Monthly Attendance — All Employees (Last 9 Months)</h3>
             <ResponsiveContainer width="100%" height={320}>
               <BarChart data={monthlyComparison}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -434,7 +434,7 @@ const Analytics = () => {
           {/* Pie chart */}
           <div className="analytics-card">
             <h3>
-              {selectedEmployee === 'all' ? 'Overall Breakdown (5 Months)' : `${selectedEmployee} — Breakdown`}
+              {selectedEmployee === 'all' ? 'Overall Breakdown (9 Months)' : `${selectedEmployee} — Breakdown`}
             </h3>
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
@@ -477,7 +477,7 @@ const Analytics = () => {
           ) : (
             /* Attendance ranking when "All" selected */
             <div className="analytics-card">
-              <h3>Attendance Ranking (5 Months)</h3>
+              <h3>Attendance Ranking (9 Months)</h3>
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={ranking} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
