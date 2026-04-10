@@ -42,6 +42,15 @@ const leaveSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    isHalfDay: {
+      type: Boolean,
+      default: false,
+    },
+    halfDaySession: {
+      type: String,
+      enum: ["first_half", "second_half", null],
+      default: null,
+    },
   },
   { timestamps: true }
 );

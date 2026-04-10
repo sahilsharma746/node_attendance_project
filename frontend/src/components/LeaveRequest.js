@@ -19,7 +19,14 @@ const formatDisplayDate = (dateStr) => {
 
 const LeaveRequest = () => {
   const [leaves, setLeaves] = useState([]);
-  const [stats, setStats] = useState({ remaining: 24, usedThisYear: 0, pendingCount: 0 });
+  const [stats, setStats] = useState({
+    remaining: 0,
+    usedThisYear: 0,
+    pendingCount: 0,
+    perMonth: 2,
+    entitledSoFar: 0,
+    currentMonth: 1,
+  });
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -29,6 +36,8 @@ const LeaveRequest = () => {
     startDate: '',
     endDate: '',
     reason: '',
+    isHalfDay: false,
+    halfDaySession: 'first_half',
   });
 
   const fetchData = async () => {
@@ -43,6 +52,9 @@ const LeaveRequest = () => {
         remaining: statsRes.data.remaining,
         usedThisYear: statsRes.data.usedThisYear,
         pendingCount: statsRes.data.pendingCount,
+        perMonth: statsRes.data.perMonth || 2,
+        entitledSoFar: statsRes.data.entitledSoFar || 0,
+        currentMonth: statsRes.data.currentMonth || 1,
       });
     } catch (err) {
       setError(err.response?.data?.msg || 'Failed to load leave data');
@@ -57,24 +69,53 @@ const LeaveRequest = () => {
 
   const openModal = () => {
     setError('');
-    setForm({ type: 'casual', startDate: '', endDate: '', reason: '' });
+    setForm({
+      type: 'casual',
+      startDate: '',
+      endDate: '',
+      reason: '',
+      isHalfDay: false,
+      halfDaySession: 'first_half',
+    });
     setShowModal(true);
   };
 
   const closeModal = () => setShowModal(false);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-    if (name === 'startDate' && form.endDate && value > form.endDate) {
-      setForm((prev) => ({ ...prev, endDate: value }));
+    const { name, value, type, checked } = e.target;
+    if (type === 'checkbox') {
+      setForm((prev) => {
+        const next = { ...prev, [name]: checked };
+        // When toggling half-day on, force endDate = startDate
+        if (name === 'isHalfDay' && checked && prev.startDate) {
+          next.endDate = prev.startDate;
+        }
+        return next;
+      });
+      return;
     }
+    setForm((prev) => {
+      const next = { ...prev, [name]: value };
+      // For half day, keep endDate locked to startDate
+      if (prev.isHalfDay && name === 'startDate') {
+        next.endDate = value;
+      }
+      if (name === 'startDate' && prev.endDate && value > prev.endDate) {
+        next.endDate = value;
+      }
+      return next;
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.startDate || !form.endDate) {
       setError('Please select start and end dates');
+      return;
+    }
+    if (form.isHalfDay && form.startDate !== form.endDate) {
+      setError('Half-day leave must be on a single date');
       return;
     }
     setSubmitting(true);
@@ -85,6 +126,8 @@ const LeaveRequest = () => {
         startDate: form.startDate,
         endDate: form.endDate,
         reason: form.reason.trim(),
+        isHalfDay: form.isHalfDay,
+        halfDaySession: form.isHalfDay ? form.halfDaySession : null,
       });
       closeModal();
       fetchData();
@@ -122,21 +165,23 @@ const LeaveRequest = () => {
       </div>
 
       <div className="summary-cards">
-        {/* <div className="summary-card">
-          <div className="card-title">Total Balance</div>
+        <div className="summary-card">
+          <div className="card-title">Casual Leave Balance</div>
           <div className="card-value">{stats.remaining}</div>
-          <div className="card-subtitle">Days remaining</div>
+          <div className="card-subtitle">
+            {stats.entitledSoFar} entitled · {stats.usedThisYear} used
+          </div>
         </div>
         <div className="summary-card">
-          <div className="card-title">Used This Year</div>
-          <div className="card-value">{stats.usedThisYear}</div>
-          <div className="card-subtitle">Days taken</div>
-        </div> */}
-        {/* <div className="summary-card">
+          <div className="card-title">Monthly Allowance</div>
+          <div className="card-value">{stats.perMonth}</div>
+          <div className="card-subtitle">Unused days carry forward</div>
+        </div>
+        <div className="summary-card">
           <div className="card-title">Pending</div>
           <div className="card-value">{stats.pendingCount}</div>
-          <div className="card-subtitle">Requests awaiting approval</div>
-        </div> */}
+          <div className="card-subtitle">Awaiting approval</div>
+        </div>
       </div>
 
       <div className="request-history-section">
@@ -162,7 +207,12 @@ const LeaveRequest = () => {
                       {leave.status}
                     </span>
                     <span className="leave-item-type">{leave.type}</span>
-                    <span className="leave-item-days">{leave.days} day{leave.days !== 1 ? 's' : ''}</span>
+                    <span className="leave-item-days">
+                      {leave.days} day{leave.days !== 1 ? 's' : ''}
+                      {leave.isHalfDay && (
+                        <> · {leave.halfDaySession === 'first_half' ? 'Morning' : 'Afternoon'}</>
+                      )}
+                    </span>
                   </div>
                   {leave.reason && <div className="leave-item-reason">{leave.reason}</div>}
                   {leave.adminNote && leave.status === 'rejected' && (
@@ -200,9 +250,35 @@ const LeaveRequest = () => {
                   ))}
                 </select>
               </div>
+              <div className="form-group half-day-toggle">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="isHalfDay"
+                    checked={form.isHalfDay}
+                    onChange={handleChange}
+                  />
+                  <span>Apply for half day</span>
+                </label>
+              </div>
+              {form.isHalfDay && (
+                <div className="form-group">
+                  <label htmlFor="halfDaySession">Session</label>
+                  <select
+                    id="halfDaySession"
+                    name="halfDaySession"
+                    value={form.halfDaySession}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="first_half">First Half (Morning)</option>
+                    <option value="second_half">Second Half (Afternoon)</option>
+                  </select>
+                </div>
+              )}
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="startDate">Start Date</label>
+                  <label htmlFor="startDate">{form.isHalfDay ? 'Date' : 'Start Date'}</label>
                   <input
                     id="startDate"
                     name="startDate"
@@ -212,18 +288,20 @@ const LeaveRequest = () => {
                     required
                   />
                 </div>
-                <div className="form-group">
-                  <label htmlFor="endDate">End Date</label>
-                  <input
-                    id="endDate"
-                    name="endDate"
-                    type="date"
-                    value={form.endDate}
-                    onChange={handleChange}
-                    min={form.startDate || undefined}
-                    required
-                  />
-                </div>
+                {!form.isHalfDay && (
+                  <div className="form-group">
+                    <label htmlFor="endDate">End Date</label>
+                    <input
+                      id="endDate"
+                      name="endDate"
+                      type="date"
+                      value={form.endDate}
+                      onChange={handleChange}
+                      min={form.startDate || undefined}
+                      required
+                    />
+                  </div>
+                )}
               </div>
               <div className="form-group">
                 <label htmlFor="reason">Reason (optional)</label>
