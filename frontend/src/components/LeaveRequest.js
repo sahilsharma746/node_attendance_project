@@ -26,6 +26,7 @@ const LeaveRequest = () => {
     perMonth: 2,
     entitledSoFar: 0,
     currentMonth: 1,
+    totalBalance: 0,
   });
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -55,6 +56,7 @@ const LeaveRequest = () => {
         perMonth: statsRes.data.perMonth || 2,
         entitledSoFar: statsRes.data.entitledSoFar || 0,
         currentMonth: statsRes.data.currentMonth || 1,
+        totalBalance: statsRes.data.totalBalance || 0,
       });
     } catch (err) {
       setError(err.response?.data?.msg || 'Failed to load leave data');
@@ -169,7 +171,7 @@ const LeaveRequest = () => {
           <div className="card-title">Casual Leave Balance</div>
           <div className="card-value">{stats.remaining}</div>
           <div className="card-subtitle">
-            {stats.entitledSoFar} entitled · {stats.usedThisYear} used
+            {stats.entitledSoFar} of {stats.totalBalance} entitled · {stats.usedThisYear} used
           </div>
         </div>
         <div className="summary-card">
