@@ -5,16 +5,24 @@ const adminAuth = require("../middleware/auth").adminAuth;
 const Leave = require("../models/Leave");
 const User = require("../models/User");
 
-const CASUAL_LEAVE_PER_YEAR = 24;
+const CASUAL_LEAVE_PER_MONTH = 2;
+const CASUAL_LEAVE_PER_YEAR = CASUAL_LEAVE_PER_MONTH * 12;
+
+function calculateLeaveDays(doc) {
+  if (doc.isHalfDay) return 0.5;
+  const start = new Date(doc.startDate);
+  const end = new Date(doc.endDate);
+  return Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+}
 
 function formatLeave(leave, includeUser = false) {
   const doc = leave.toObject ? leave.toObject() : leave;
   const start = new Date(doc.startDate);
   const end = new Date(doc.endDate);
-  const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+  const days = calculateLeaveDays(doc);
   const out = {
     _id: doc._id,
-    type: doc.type, 
+    type: doc.type,
     startDate: doc.startDate,
     endDate: doc.endDate,
     startDateStr: start.toISOString().slice(0, 10),
@@ -22,6 +30,8 @@ function formatLeave(leave, includeUser = false) {
     reason: doc.reason || "",
     status: doc.status,
     days,
+    isHalfDay: !!doc.isHalfDay,
+    halfDaySession: doc.halfDaySession || null,
     createdAt: doc.createdAt,
   };
   if (doc.adminNote) out.adminNote = doc.adminNote;
@@ -41,7 +51,7 @@ router.post("/", auth, async (req, res) => {
     if (!userId) {
       return res.status(401).json({ msg: "User not found in token" });
     }
-    const { type, startDate, endDate, reason } = req.body;
+    const { type, startDate, endDate, reason, isHalfDay, halfDaySession } = req.body;
     if (!startDate || !endDate) {
       return res.status(400).json({ msg: "Start date and end date are required" });
     }
@@ -53,6 +63,14 @@ router.post("/", auth, async (req, res) => {
     if (end < start) {
       return res.status(400).json({ msg: "End date must be on or after start date" });
     }
+    if (isHalfDay) {
+      if (start.toISOString().slice(0, 10) !== end.toISOString().slice(0, 10)) {
+        return res.status(400).json({ msg: "Half-day leave must have the same start and end date" });
+      }
+      if (!["first_half", "second_half"].includes(halfDaySession)) {
+        return res.status(400).json({ msg: "Half-day session must be 'first_half' or 'second_half'" });
+      }
+    }
     const leave = await Leave.create({
       user: userId,
       type: type || "casual",
@@ -60,6 +78,8 @@ router.post("/", auth, async (req, res) => {
       endDate: end,
       reason: reason || "",
       status: "pending",
+      isHalfDay: !!isHalfDay,
+      halfDaySession: isHalfDay ? halfDaySession : null,
     });
     res.status(201).json(formatLeave(leave));
   } catch (error) {
@@ -95,32 +115,44 @@ router.get("/my", auth, async (req, res) => {
 router.get("/my/stats", auth, async (req, res) => {
   try {
     const now = new Date();
+    const currentMonth = now.getMonth() + 1; // 1-12
     const yearStart = new Date(now.getFullYear(), 0, 1);
     const yearEnd = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
 
-    const [approvedLeaves, pendingCount] = await Promise.all([
+    const [approvedCasual, pendingCount] = await Promise.all([
       Leave.find({
         user: req.user.id,
         status: "approved",
+        type: "casual",
         startDate: { $gte: yearStart },
         endDate: { $lte: yearEnd },
       }).lean(),
       Leave.countDocuments({ user: req.user.id, status: "pending" }),
     ]);
 
-    let usedDays = 0;
-    for (const l of approvedLeaves) {
-      const start = new Date(l.startDate);
-      const end = new Date(l.endDate);
-      usedDays += Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+    // Total used casual leave days in current year (with half-day support)
+    let usedCasualDays = 0;
+    for (const l of approvedCasual) {
+      usedCasualDays += calculateLeaveDays(l);
     }
 
-    const balance = Math.max(0, CASUAL_LEAVE_PER_YEAR - usedDays);
+    // Casual leave with carry-forward logic:
+    // Each month grants CASUAL_LEAVE_PER_MONTH leaves. Unused leaves carry to next month.
+    // By month X, total entitled = X * CASUAL_LEAVE_PER_MONTH (capped at yearly total)
+    const entitledSoFar = Math.min(
+      currentMonth * CASUAL_LEAVE_PER_MONTH,
+      CASUAL_LEAVE_PER_YEAR
+    );
+    const remaining = Math.max(0, entitledSoFar - usedCasualDays);
+
     res.json({
       totalBalance: CASUAL_LEAVE_PER_YEAR,
-      usedThisYear: usedDays,
-      remaining: balance,
+      perMonth: CASUAL_LEAVE_PER_MONTH,
+      entitledSoFar,
+      usedThisYear: usedCasualDays,
+      remaining,
       pendingCount,
+      currentMonth,
     });
   } catch (error) {
     console.error("Leave stats error:", error);
