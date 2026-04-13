@@ -136,21 +136,47 @@ router.get("/my/stats", auth, async (req, res) => {
       usedCasualDays += calculateLeaveDays(l);
     }
 
-    // Casual leave with carry-forward logic:
-    // Each month grants CASUAL_LEAVE_PER_MONTH leaves. Unused leaves carry to next month.
-    // By month X, total entitled = X * CASUAL_LEAVE_PER_MONTH (capped at yearly total)
-    const entitledSoFar = Math.min(
-      currentMonth * CASUAL_LEAVE_PER_MONTH,
-      CASUAL_LEAVE_PER_YEAR
-    );
-    const remaining = Math.max(0, entitledSoFar - usedCasualDays);
+    // Casual leave with expiry logic:
+    // Each month grants CASUAL_LEAVE_PER_MONTH leaves.
+    // Unused leaves expire after 2 months (e.g., Jan leaves expire at end of March).
+    // Used leaves are deducted FIFO (oldest allocation first).
+    const EXPIRY_MONTHS = 2;
+    let remainingUsed = usedCasualDays;
+    let available = 0;
+    let expired = 0;
+
+    for (let m = 1; m <= currentMonth; m++) {
+      let allocation = CASUAL_LEAVE_PER_MONTH;
+
+      // Deduct used leaves from oldest allocation first (FIFO)
+      const deduct = Math.min(remainingUsed, allocation);
+      remainingUsed -= deduct;
+      allocation -= deduct;
+
+      // Check if this month's remaining unused leaves have expired
+      const isExpired = currentMonth > m + EXPIRY_MONTHS;
+      if (isExpired) {
+        expired += allocation; // unused portion is lost
+      } else {
+        available += allocation;
+      }
+    }
+
+    // entitledSoFar = total non-expired leaves (before usage)
+    let entitledSoFar = 0;
+    for (let m = 1; m <= currentMonth; m++) {
+      if (currentMonth <= m + EXPIRY_MONTHS) {
+        entitledSoFar += CASUAL_LEAVE_PER_MONTH;
+      }
+    }
 
     res.json({
       totalBalance: CASUAL_LEAVE_PER_YEAR,
       perMonth: CASUAL_LEAVE_PER_MONTH,
       entitledSoFar,
       usedThisYear: usedCasualDays,
-      remaining,
+      remaining: available,
+      expired,
       pendingCount,
       currentMonth,
     });
