@@ -27,6 +27,7 @@ const LeaveRequest = () => {
     entitledSoFar: 0,
     currentMonth: 1,
     totalBalance: 0,
+    expired: 0,
   });
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -57,6 +58,7 @@ const LeaveRequest = () => {
         entitledSoFar: statsRes.data.entitledSoFar || 0,
         currentMonth: statsRes.data.currentMonth || 1,
         totalBalance: statsRes.data.totalBalance || 0,
+        expired: statsRes.data.expired || 0,
       });
     } catch (err) {
       setError(err.response?.data?.msg || 'Failed to load leave data');
@@ -172,6 +174,7 @@ const LeaveRequest = () => {
           <div className="card-value">{stats.remaining}</div>
           <div className="card-subtitle">
             {stats.entitledSoFar} of {stats.totalBalance} entitled · {stats.usedThisYear} used
+            {stats.expired > 0 && <> · {stats.expired} expired</>}
           </div>
         </div>
         <div className="summary-card">
