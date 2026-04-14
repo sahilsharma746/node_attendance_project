@@ -124,6 +124,12 @@ const Profile = () => {
           <div className="form-group">
             <label className="profile-upload-label">
               <span className="profile-upload-btn">Upload an image file</span>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="profile-file-input"
+              />
             </label>
           </div>
           <div className="profile-actions">
