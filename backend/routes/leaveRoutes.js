@@ -138,9 +138,9 @@ router.get("/my/stats", auth, async (req, res) => {
 
     // Casual leave with expiry logic:
     // Each month grants CASUAL_LEAVE_PER_MONTH leaves.
-    // Unused leaves expire after 2 months (e.g., Jan leaves expire at end of March).
+    // Unused leaves expire after 6 months (e.g., Jan leaves expire at end of July).
     // Used leaves are deducted FIFO (oldest allocation first).
-    const EXPIRY_MONTHS = 2;
+    const EXPIRY_MONTHS = 6;
     let remainingUsed = usedCasualDays;
     let available = 0;
     let expired = 0;
