@@ -170,7 +170,6 @@ const AttendanceSheet = () => {
     return rows.map((row) => {
       const name = row[0];
       let present = 0, absent = 0, wfh = 0, leave = 0, holiday = 0;
-      const totalDays = row.length - 1;
       for (let i = 1; i < row.length; i++) {
         const cat = categorize(row[i]);
         if (cat === 'present') present++;
@@ -179,6 +178,7 @@ const AttendanceSheet = () => {
         else if (cat === 'leave') leave++;
         else if (cat === 'holiday') holiday++;
       }
+      const totalDays = present + absent + wfh + leave;
       return { name, totalDays, present, absent, wfh, leave, holiday };
     });
   };
