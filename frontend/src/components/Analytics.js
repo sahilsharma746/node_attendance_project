@@ -229,7 +229,7 @@ const Analytics = () => {
         const emp = m.employees[name];
         if (emp) {
           totalPresent += emp.present;
-          totalDays += emp.totalDays;
+          totalDays += emp.present + emp.absent + (emp.wfh || 0) + (emp.leave || 0);
         }
       });
       const rate = totalDays > 0 ? Math.round((totalPresent / totalDays) * 100) : 0;
