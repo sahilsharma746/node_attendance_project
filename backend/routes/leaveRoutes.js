@@ -5,8 +5,8 @@ const adminAuth = require("../middleware/auth").adminAuth;
 const Leave = require("../models/Leave");
 const User = require("../models/User");
 
-const CASUAL_LEAVE_PER_MONTH = 2;
-const CASUAL_LEAVE_PER_YEAR = CASUAL_LEAVE_PER_MONTH * 12;
+const CASUAL_LEAVE_PER_MONTH = 1.5; // 1 full day + 1 half day per month
+const CASUAL_LEAVE_PER_YEAR = CASUAL_LEAVE_PER_MONTH * 12; // 18 days per year
 
 function calculateLeaveDays(doc) {
   if (doc.isHalfDay) return 0.5;
