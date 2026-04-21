@@ -215,3 +215,51 @@
   padding-top: 16px;
   border-top: 1px solid #e5e7eb;
 }
+
+@media (max-width: 768px) {
+  .admin-holidays .card-header-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .admin-holidays .section-title {
+    font-size: 18px;
+  }
+
+  .holidays-header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .holidays-header-actions .filter-select.year-select {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .holidays-header-actions .add-holiday-btn {
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .holidays-card {
+    padding: 16px;
+  }
+
+  .holidays-table th {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+
+  .holidays-table td {
+    padding: 12px 8px;
+    font-size: 13px;
+  }
+
+  .holiday-modal {
+    margin: 16px;
+    max-width: calc(100vw - 32px);
+  }
+}
