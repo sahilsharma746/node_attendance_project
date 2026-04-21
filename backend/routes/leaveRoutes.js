@@ -5,6 +5,7 @@ const adminAuth = require("../middleware/auth").adminAuth;
 const Leave = require("../models/Leave");
 const User = require("../models/User");
 const { sendEmail, leaveRequestEmail, leaveStatusEmail } = require("../utils/sendEmail");
+const { getSheetLeaveCounts } = require("../utils/sheetLeaves");
 
 const CASUAL_LEAVE_PER_MONTH = 1.5; // 1 full day + 1 half day per month
 const CASUAL_LEAVE_PER_YEAR = CASUAL_LEAVE_PER_MONTH * 12; // 18 days per year
@@ -137,7 +138,7 @@ router.get("/my/stats", auth, async (req, res) => {
     const yearStart = new Date(now.getFullYear(), 0, 1);
     const yearEnd = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
 
-    const [approvedCasual, pendingCount] = await Promise.all([
+    const [approvedCasual, pendingCount, currentUser] = await Promise.all([
       Leave.find({
         user: req.user.id,
         status: "approved",
@@ -146,12 +147,24 @@ router.get("/my/stats", auth, async (req, res) => {
         endDate: { $lte: yearEnd },
       }).lean(),
       Leave.countDocuments({ user: req.user.id, status: "pending" }),
+      User.findById(req.user.id).select("name").lean(),
     ]);
 
     // Total used casual leave days in current year (with half-day support)
     let usedCasualDays = 0;
     for (const l of approvedCasual) {
       usedCasualDays += calculateLeaveDays(l);
+    }
+
+    // Add leaves from Google Sheet
+    try {
+      const sheetLeaves = await getSheetLeaveCounts();
+      const firstName = (currentUser?.name || "").split(" ")[0].toLowerCase();
+      if (firstName && sheetLeaves[firstName]) {
+        usedCasualDays += sheetLeaves[firstName];
+      }
+    } catch (err) {
+      console.error("Sheet leave fetch error:", err.message);
     }
 
     // Casual leave with expiry logic:
