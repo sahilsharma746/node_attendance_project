@@ -72,5 +72,6 @@
 
   .dashboard-content {
     margin-left: 0;
+    min-width: 0;
   }
 }

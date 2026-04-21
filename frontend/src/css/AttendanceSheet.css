@@ -363,16 +363,53 @@
 
 @media (max-width: 768px) {
   .sheet-container {
-    padding: 20px;
+    padding: 16px;
     padding-top: 76px;
+    min-width: 0;
+    overflow: hidden;
   }
 
   .sheet-title {
-    font-size: 24px;
+    font-size: 22px;
+  }
+
+  .sheet-subtitle {
+    font-size: 14px;
   }
 
   .sheet-card {
-    padding: 16px;
+    padding: 12px;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .sheet-table-wrapper {
+    margin: 0 -12px;
+    padding: 0 12px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sheet-table {
+    min-width: 500px;
+  }
+
+  .sheet-table th {
+    padding: 8px 6px;
+    font-size: 11px;
+  }
+
+  .sheet-table td {
+    padding: 10px 6px;
+    font-size: 12px;
+  }
+
+  .summary-table td {
+    font-size: 13px;
+    padding: 12px 6px;
+  }
+
+  .card-title {
+    font-size: 16px;
   }
 
   .month-tabs {
@@ -380,8 +417,8 @@
   }
 
   .month-tab {
-    padding: 6px 14px;
-    font-size: 13px;
+    padding: 6px 12px;
+    font-size: 12px;
   }
 
   .source-toggle {
@@ -394,7 +431,44 @@
     font-size: 13px;
   }
 
+  .view-toggle {
+    width: 100%;
+  }
+
+  .toggle-btn {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .sheet-legend {
+    gap: 12px;
+  }
+
+  .legend-item {
+    font-size: 12px;
+  }
+
   .sys-filters {
     flex-wrap: wrap;
+  }
+
+  .sys-select {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .sys-day-cell {
+    min-width: 24px;
+    font-size: 10px !important;
+    padding: 6px 2px !important;
+  }
+
+  .cell-name {
+    min-width: 80px;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
