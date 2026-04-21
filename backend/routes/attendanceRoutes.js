@@ -313,7 +313,7 @@ router.get("/team-monthly", auth, async (req, res) => {
     const daysInMonth = new Date(year, month, 0).getDate();
 
     const [allUsers, records] = await Promise.all([
-      User.find({}).select("_id name email").lean(),
+      User.find({}).select("_id name email profilePic").lean(),
       Attendance.find({ date: { $gte: start, $lte: end } })
         .populate("user", "name email")
         .lean(),
@@ -465,7 +465,7 @@ router.get("/summary", adminAuth, async (req, res) => {
     const totalWorkingDays = getWorkingDaysInMonth(month, year);
 
     const [allUsers, attendanceInMonth, approvedLeaves] = await Promise.all([
-      User.find({}).select("_id name email").lean(),
+      User.find({}).select("_id name email profilePic").lean(),
       Attendance.find({ date: { $gte: start, $lte: end } }).lean(),
       Leave.find({
         status: "approved",
@@ -490,7 +490,7 @@ router.get("/summary", adminAuth, async (req, res) => {
     });
 
     const summary = allUsers.map((u) => ({
-      user: { _id: u._id, name: u.name || u.email, email: u.email },
+      user: { _id: u._id, name: u.name || u.email, email: u.email, profilePic: u.profilePic || null },
       daysPresent: daysPresentByUser[u._id.toString()] || 0,
       daysOnLeave: daysOnLeaveByUser[u._id.toString()] || 0,
       totalWorkingDays,
