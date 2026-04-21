@@ -333,7 +333,7 @@ router.get("/team-monthly", auth, async (req, res) => {
     records.forEach((r) => {
       const uid = r.user?._id?.toString() || r.user?.toString();
       if (!uid || !userMap[uid]) return;
-      const day = new Date(r.date).getDate();
+      const day = getISTDay(r.date);
       const status = getAttendanceStatus(r.checkIn, r.checkOut);
       userMap[uid].days[day] = {
         present: true,
@@ -514,6 +514,11 @@ function getWorkingDaysInMonth(month, year) {
     d.setDate(d.getDate() + 1);
   }
   return count;
+}
+
+function getISTDay(date) {
+  // Get the day of month in IST timezone
+  return parseInt(new Date(date).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }).split("-")[2], 10);
 }
 
 function getISTDateStart(now) {
