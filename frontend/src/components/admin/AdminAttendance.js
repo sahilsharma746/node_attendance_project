@@ -302,7 +302,13 @@ const AdminAttendance = () => {
                   <tr key={row.user._id}>
                     <td>
                       <div className="employee-cell">
-                        <div className="avatar admin-avatar"></div>
+                        <div className="avatar admin-avatar">
+                          {row.user.profilePic ? (
+                            <img src={row.user.profilePic} alt={row.user.name} />
+                          ) : (
+                            (row.user.name || row.user.email || '?').charAt(0).toUpperCase()
+                          )}
+                        </div>
                         <span>{row.user.name || row.user.email}</span>
                       </div>
                     </td>
