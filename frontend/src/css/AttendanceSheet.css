@@ -3,6 +3,8 @@
   padding: 32px;
   background-color: #f5f5f5;
   min-height: 100vh;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 .sheet-header {
