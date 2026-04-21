@@ -83,17 +83,40 @@
 @media (max-width: 768px) {
   .admin-panel-container {
     margin-left: 0;
-    padding: 20px;
-    padding-top: 76px; 
+    padding: 16px;
+    padding-top: 76px;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .admin-header {
+    margin-bottom: 20px;
   }
 
   .admin-title {
-    font-size: 24px;
+    font-size: 22px;
+  }
+
+  .admin-subtitle {
+    font-size: 14px;
   }
 
   .admin-nav-tabs {
-    gap: 12px;
+    gap: 0;
     overflow-x: auto;
-    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 20px;
+    padding: 4px;
+  }
+
+  .admin-nav-tab {
+    padding: 8px 14px;
+    font-size: 13px;
+    gap: 6px;
+  }
+
+  .admin-nav-tab-icon {
+    width: 16px;
+    height: 16px;
   }
 }
