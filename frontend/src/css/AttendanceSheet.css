@@ -132,6 +132,12 @@
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.sheet-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .card-title {
@@ -142,10 +148,6 @@
 }
 
 /* Table */
-.sheet-table-wrapper {
-  overflow-x: auto;
-}
-
 .sheet-table {
   width: 100%;
   border-collapse: collapse;
