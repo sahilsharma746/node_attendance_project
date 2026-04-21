@@ -4,6 +4,7 @@ const auth = require("../middleware/auth");
 const adminAuth = require("../middleware/auth").adminAuth;
 const Leave = require("../models/Leave");
 const User = require("../models/User");
+const { sendEmail, leaveRequestEmail, leaveStatusEmail } = require("../utils/sendEmail");
 
 const CASUAL_LEAVE_PER_MONTH = 1.5; // 1 full day + 1 half day per month
 const CASUAL_LEAVE_PER_YEAR = CASUAL_LEAVE_PER_MONTH * 12; // 18 days per year
@@ -81,6 +82,23 @@ router.post("/", auth, async (req, res) => {
       isHalfDay: !!isHalfDay,
       halfDaySession: isHalfDay ? halfDaySession : null,
     });
+
+    // Send email notification to admin(s)
+    const employee = await User.findById(userId).select("name").lean();
+    if (process.env.NOTIFY_EMAIL && employee) {
+      const adminEmails = process.env.NOTIFY_EMAIL.split(",").map(e => e.trim());
+      const emailData = leaveRequestEmail({
+        employeeName: employee.name,
+        type: type || "casual",
+        startDate: start.toISOString().slice(0, 10),
+        endDate: end.toISOString().slice(0, 10),
+        reason: reason || "",
+        isHalfDay: !!isHalfDay,
+        halfDaySession,
+      });
+      sendEmail({ to: adminEmails, ...emailData });
+    }
+
     res.status(201).json(formatLeave(leave));
   } catch (error) {
     if (error.message && error.message.includes("End date")) {
@@ -245,6 +263,22 @@ router.patch("/admin/:id", adminAuth, async (req, res) => {
     if (adminNote) leave.adminNote = adminNote;
     await leave.save();
     const populated = await Leave.findById(leave._id).populate("user", "name email").lean();
+
+    // Send email notification to employee
+    if (populated.user?.email) {
+      const emailData = leaveStatusEmail({
+        employeeName: populated.user.name,
+        type: populated.type,
+        startDate: new Date(populated.startDate).toISOString().slice(0, 10),
+        endDate: new Date(populated.endDate).toISOString().slice(0, 10),
+        status: leave.status,
+        adminNote: adminNote || "",
+        isHalfDay: !!populated.isHalfDay,
+        halfDaySession: populated.halfDaySession,
+      });
+      sendEmail({ to: populated.user.email, ...emailData });
+    }
+
     res.json(formatLeave(populated, true));
   } catch (error) {
     console.error("Review leave error:", error);
