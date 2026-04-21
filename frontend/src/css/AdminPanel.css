@@ -3,8 +3,7 @@
   padding: 40px;
   background-color: #f5f7fa;
   min-height: 100vh;
-  overflow-x: hidden;
-  max-width: 100%;
+  min-width: 0;
 }
 
 .admin-header {
