@@ -3,12 +3,12 @@
   "name": "Cloveode Attendance",
   "icons": [
     {
-      "src": "images/systum-logo.png",
+      "src": "images/logo-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "images/systum-logo.png",
+      "src": "images/logo-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
