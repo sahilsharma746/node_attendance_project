@@ -132,10 +132,11 @@ router.post("/check-in", auth, async (req, res) => {
     const userId = req.user.id;
     const now = new Date();
     const dateStart = getISTDateStart(now);
+    const dateEnd = new Date(dateStart.getTime() + 24 * 60 * 60 * 1000);
 
     const existing = await Attendance.findOne({
       user: userId,
-      date: dateStart,
+      date: { $gte: dateStart, $lt: dateEnd },
     });
 
     if (existing) {
@@ -167,10 +168,11 @@ router.post("/check-out", auth, async (req, res) => {
     const userId = req.user.id;
     const now = new Date();
     const dateStart = getISTDateStart(now);
+    const dateEnd = new Date(dateStart.getTime() + 24 * 60 * 60 * 1000);
 
     const record = await Attendance.findOne({
       user: userId,
-      date: dateStart,
+      date: { $gte: dateStart, $lt: dateEnd },
     });
 
     if (!record) {
@@ -203,10 +205,11 @@ router.get("/today", auth, async (req, res) => {
     const userId = req.user.id;
     const now = new Date();
     const dateStart = getISTDateStart(now);
+    const dateEnd = new Date(dateStart.getTime() + 24 * 60 * 60 * 1000);
 
     const record = await Attendance.findOne({
       user: userId,
-      date: dateStart,
+      date: { $gte: dateStart, $lt: dateEnd },
     }).lean();
 
     if (!record) {
@@ -271,10 +274,11 @@ router.get("/in-office", auth, async (req, res) => {
   try {
     const now = new Date();
     const dateStart = getISTDateStart(now);
+    const dateEnd = new Date(dateStart.getTime() + 24 * 60 * 60 * 1000);
 
     const records = await Attendance.find({
-      date: dateStart,
-      checkOut: null, // Only those who haven't checked out
+      date: { $gte: dateStart, $lt: dateEnd },
+      checkOut: null,
     })
       .populate("user", "name email")
       .sort({ checkIn: 1 })
