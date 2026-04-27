@@ -159,7 +159,7 @@ const DashboardOverview = () => {
           <div className="punch-status-row">
             <span className={`punch-badge ${isPunchedIn ? 'active' : isCheckedOut ? 'completed' : 'inactive'}`}>
               <span className="punch-dot"></span>
-              {isPunchedIn ? 'Punched In' : isCheckedOut ? 'Checked Out' : 'Not Punched In'}
+              {isPunchedIn ? 'Punched In' : isCheckedOut ? 'Punched Out' : 'Not Punched In'}
             </span>
             <div className="punch-schedule">
               <span className="schedule-label">TODAY'S SCHEDULE</span>

@@ -188,7 +188,7 @@ const Attendance = () => {
                 <div className={`att-status-dot ${isPunchedIn ? 'active' : isCheckedOut ? 'completed' : ''}`}></div>
                 <span className="att-status-label">Current Status</span>
               </div>
-              <h2 className="att-status-text">{isPunchedIn ? 'Punched In' : isCheckedOut ? 'Checked Out' : 'Not Punched In'}</h2>
+              <h2 className="att-status-text">{isPunchedIn ? 'Punched In' : isCheckedOut ? 'Punched Out' : 'Not Punched In'}</h2>
               {checkInTime && <p className="att-status-since">{isCheckedOut ? 'Completed for today' : `Since ${formatTime(checkInTime)}`}</p>}
             </div>
             <div className="att-status-icon-circle">
