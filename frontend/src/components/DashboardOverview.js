@@ -50,16 +50,15 @@ const DashboardOverview = () => {
     if (!user) { setLoading(false); return; }
     setLoading(true);
     try {
-      const [todayRes, leaveRes, summaryRes, holidayRes, updatesRes, onLeaveRes] = await Promise.all([
+      // Fetch fast endpoints first, leave stats separately (it can be slow)
+      const [todayRes, summaryRes, holidayRes, updatesRes, onLeaveRes] = await Promise.all([
         axios.get(`${ATTENDANCE_API}/today`),
-        axios.get(`${LEAVE_API}/my/stats`),
         axios.get(`${ATTENDANCE_API}/my-summary`),
         axios.get(`${HOLIDAYS_API}/upcoming`),
         axios.get(UPDATES_API),
         axios.get(`${LEAVE_API}/on-leave-today`),
       ]);
       setTodayStatus(todayRes.data);
-      setLeaveStats(leaveRes.data);
       setWeeklySummary(summaryRes.data);
       setUpcomingHolidays(Array.isArray(holidayRes.data) ? holidayRes.data.slice(0, 1) : []);
       setUpdates(Array.isArray(updatesRes.data) ? updatesRes.data.slice(0, 2) : []);
@@ -67,6 +66,8 @@ const DashboardOverview = () => {
       if (todayRes.data.checkedIn && todayRes.data.checkInTime) {
         startTimer(todayRes.data.checkInTime);
       }
+      // Fetch leave stats in background (can be slow due to Google Sheet)
+      axios.get(`${LEAVE_API}/my/stats`).then(r => setLeaveStats(r.data)).catch(() => {});
     } catch (err) {
       console.error('Dashboard fetch error:', err);
     } finally {

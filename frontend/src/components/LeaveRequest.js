@@ -19,12 +19,10 @@ const LeaveRequest = () => {
     if (!user) { setLoading(false); return; }
     setLoading(true);
     try {
-      const [statsRes, leavesRes] = await Promise.all([
-        axios.get(`${LEAVE_API}/my/stats`),
-        axios.get(`${LEAVE_API}/my`),
-      ]);
-      setLeaveStats(statsRes.data);
+      const leavesRes = await axios.get(`${LEAVE_API}/my`);
       setLeaves(Array.isArray(leavesRes.data) ? leavesRes.data : []);
+      // Fetch stats in background (can be slow)
+      axios.get(`${LEAVE_API}/my/stats`).then(r => setLeaveStats(r.data)).catch(() => {});
     } catch (err) { console.error('Leave fetch error:', err); }
     finally { setLoading(false); }
   }, [user]);

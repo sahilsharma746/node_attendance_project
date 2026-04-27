@@ -103,7 +103,23 @@ router.post("/users", auth, adminAuth, async (req, res) => {
 
 router.patch("/me", auth, async (req, res) => {
   try {
-    const { name, profilePic } = req.body;
+    const { name, profilePic, currentPassword, newPassword } = req.body;
+
+    // Handle password change
+    if (currentPassword && newPassword) {
+      if (newPassword.length < 6) {
+        return res.status(400).json({ msg: "New password must be at least 6 characters" });
+      }
+      const user = await User.findById(req.user.id);
+      if (!user) return res.status(404).json({ msg: "User not found" });
+      const isMatch = await user.comparePassword(currentPassword);
+      if (!isMatch) return res.status(400).json({ msg: "Current password is incorrect" });
+      user.password = newPassword;
+      await user.save();
+      return res.json({ msg: "Password changed successfully" });
+    }
+
+    // Handle profile update
     const updates = {};
     if (typeof name === "string" && name.trim()) updates.name = name.trim();
     if (typeof profilePic === "string") updates.profilePic = profilePic.trim();

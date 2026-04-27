@@ -28,7 +28,11 @@ function parseCSV(text) {
   return { headers: parseLine(lines[0]), rows: lines.slice(1).map(parseLine) };
 }
 
+let _cache = { data: null, ts: 0 };
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
 async function getSheetLeaveCounts() {
+  if (_cache.data && (Date.now() - _cache.ts) < CACHE_TTL) return _cache.data;
   const now = new Date();
   const currentMonthIdx = now.getMonth(); // 0-based
   const monthMap = { 'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4 };
@@ -75,6 +79,7 @@ async function getSheetLeaveCounts() {
     }
   }
 
+  _cache = { data: leaveCounts, ts: Date.now() };
   return leaveCounts;
 }
 
