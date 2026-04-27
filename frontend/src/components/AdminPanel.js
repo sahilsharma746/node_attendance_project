@@ -38,19 +38,20 @@ const AdminOverview = () => {
       const onLeave = Array.isArray(onLeaveRes.data) ? onLeaveRes.data : [];
       const records = Array.isArray(attendanceRes.data) ? attendanceRes.data : [];
       // Count late arrivals today (after 10:05 AM)
-      const todayStr = now.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+      const todayParts = { month: now.toLocaleDateString('en-US', { month: 'long', timeZone: 'Asia/Kolkata' }), day: now.getDate().toString() };
       let lateCount = 0;
       records.forEach(r => {
-        if (r.dateStr === todayStr && r.checkIn) {
-          const match = r.checkIn.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
-          if (match) {
-            let h = parseInt(match[1]);
-            const m = parseInt(match[2]);
-            const isPM = match[3].toUpperCase() === 'PM';
-            if (isPM && h !== 12) h += 12;
-            if (!isPM && h === 12) h = 0;
-            if (h > 10 || (h === 10 && m > 5)) lateCount++;
-          }
+        if (!r.date || !r.checkIn) return;
+        // Check if this record is from today by matching month and day in the display date
+        if (!r.date.includes(todayParts.month) || !r.date.includes(todayParts.day + ',')) return;
+        const match = r.checkIn.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+        if (match) {
+          let h = parseInt(match[1]);
+          const m = parseInt(match[2]);
+          const isPM = match[3].toUpperCase() === 'PM';
+          if (isPM && h !== 12) h += 12;
+          if (!isPM && h === 12) h = 0;
+          if (h > 10 || (h === 10 && m > 5)) lateCount++;
         }
       });
       setStats({ employees: users.length, pendingLeaves: leaves.length, onLeave: onLeave.length, late: lateCount });
