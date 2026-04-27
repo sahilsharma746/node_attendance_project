@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from './Sidebar';
 import MainContent from './MainContent';
+import DashboardOverview from './DashboardOverview';
 import Attendance from './Attendance';
 import LeaveRequest from './LeaveRequest';
 import Updates from './Updates';
@@ -9,10 +10,10 @@ import Profile from './Profile';
 import AdminPanel from './AdminPanel';
 import AttendanceSheet from './AttendanceSheet';
 import Analytics from './Analytics';
+import TopNav from './TopNav';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../css/Dashboard.css';
-import '../css/WelcomeBanner.css';
 
 const AdminRoute = ({ children }) => {
   const { isAdmin } = useAuth();
@@ -61,19 +62,9 @@ const Dashboard = () => {
       />
 
       <div className="dashboard-content">
-        <div className="welcome-banner">
-          <div className="welcome-left">
-            <p className="welcome-label">Welcome to</p>
-            <h2 className="welcome-company">Cloveode Technologies Pvt Ltd</h2>
-            <p className="welcome-tagline">Software & Web Development Company</p>
-          </div>
-          <div className="welcome-right">
-            <span className="welcome-icon">&#60;/&#62;</span>
-          </div>
-        </div>
-
+        <TopNav />
         <Routes>
-        <Route index element={<MainContent />} />
+        <Route index element={<DashboardOverview />} />
         <Route path="attendance" element={<Attendance />} />
         <Route path="attendance-sheet" element={<AttendanceSheet />} />
         <Route path="analytics" element={<Analytics />} />

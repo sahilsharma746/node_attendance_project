@@ -1,336 +1,160 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 import '../css/LeaveRequest.css';
 
-const API_BASE = process.env.REACT_APP_API_URL + '/api/leave';
-
-const LEAVE_TYPES = [
-  { value: 'casual', label: 'Casual Leave' },
-  { value: 'sick', label: 'Sick Leave' },
-  { value: 'emergency', label: 'Emergency Leave' },
-  { value: 'other', label: 'Other' },
-];
-
-const formatDisplayDate = (dateStr) => {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-};
+const LEAVE_API = process.env.REACT_APP_API_URL + '/api/leave';
 
 const LeaveRequest = () => {
+  const { user } = useAuth();
+  const [view, setView] = useState('balance');
+  const [leaveStats, setLeaveStats] = useState(null);
   const [leaves, setLeaves] = useState([]);
-  const [stats, setStats] = useState({
-    remaining: 0,
-    usedThisYear: 0,
-    pendingCount: 0,
-    perMonth: 2,
-    entitledSoFar: 0,
-    currentMonth: 1,
-    totalBalance: 0,
-    expired: 0,
-  });
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const [form, setForm] = useState({
-    type: 'casual',
-    startDate: '',
-    endDate: '',
-    reason: '',
-    isHalfDay: false,
-    halfDaySession: 'first_half',
-  });
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [message, setMessage] = useState(null);
+  const [form, setForm] = useState({ type: '', startDate: '', endDate: '', reason: '' });
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
+    if (!user) { setLoading(false); return; }
+    setLoading(true);
     try {
-      setLoading(true);
-      const [leavesRes, statsRes] = await Promise.all([
-        axios.get(`${API_BASE}/my`),
-        axios.get(`${API_BASE}/my/stats`),
+      const [statsRes, leavesRes] = await Promise.all([
+        axios.get(`${LEAVE_API}/my/stats`),
+        axios.get(`${LEAVE_API}/my`),
       ]);
-      setLeaves(leavesRes.data);
-      setStats({
-        remaining: statsRes.data.remaining,
-        usedThisYear: statsRes.data.usedThisYear,
-        pendingCount: statsRes.data.pendingCount,
-        perMonth: statsRes.data.perMonth || 2,
-        entitledSoFar: statsRes.data.entitledSoFar || 0,
-        currentMonth: statsRes.data.currentMonth || 1,
-        totalBalance: statsRes.data.totalBalance || 0,
-        expired: statsRes.data.expired || 0,
-      });
-    } catch (err) {
-      setError(err.response?.data?.msg || 'Failed to load leave data');
-    } finally {
-      setLoading(false);
-    }
-  };
+      setLeaveStats(statsRes.data);
+      setLeaves(Array.isArray(leavesRes.data) ? leavesRes.data : []);
+    } catch (err) { console.error('Leave fetch error:', err); }
+    finally { setLoading(false); }
+  }, [user]);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const openModal = () => {
-    setError('');
-    setForm({
-      type: 'casual',
-      startDate: '',
-      endDate: '',
-      reason: '',
-      isHalfDay: false,
-      halfDaySession: 'first_half',
-    });
-    setShowModal(true);
-  };
-
-  const closeModal = () => setShowModal(false);
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    if (type === 'checkbox') {
-      setForm((prev) => {
-        const next = { ...prev, [name]: checked };
-        // When toggling half-day on, force endDate = startDate
-        if (name === 'isHalfDay' && checked && prev.startDate) {
-          next.endDate = prev.startDate;
-        }
-        return next;
-      });
-      return;
-    }
-    setForm((prev) => {
-      const next = { ...prev, [name]: value };
-      // For half day, keep endDate locked to startDate
-      if (prev.isHalfDay && name === 'startDate') {
-        next.endDate = value;
-      }
-      if (name === 'startDate' && prev.endDate && value > prev.endDate) {
-        next.endDate = value;
-      }
-      return next;
-    });
-  };
+  useEffect(() => { fetchData(); }, [fetchData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.startDate || !form.endDate) {
-      setError('Please select start and end dates');
-      return;
+    if (!form.type || !form.startDate || !form.endDate) {
+      setMessage({ type: 'error', text: 'Please fill all required fields' }); return;
     }
-    if (form.isHalfDay && form.startDate !== form.endDate) {
-      setError('Half-day leave must be on a single date');
-      return;
-    }
-    setSubmitting(true);
-    setError('');
+    setSubmitLoading(true); setMessage(null);
     try {
-      await axios.post(API_BASE, {
-        type: form.type,
-        startDate: form.startDate,
-        endDate: form.endDate,
-        reason: form.reason.trim(),
-        isHalfDay: form.isHalfDay,
-        halfDaySession: form.isHalfDay ? form.halfDaySession : null,
-      });
-      closeModal();
+      await axios.post(LEAVE_API, form);
+      setMessage({ type: 'success', text: 'Leave request submitted successfully!' });
+      setForm({ type: '', startDate: '', endDate: '', reason: '' });
       fetchData();
+      setTimeout(() => setView('balance'), 1500);
     } catch (err) {
-      setError(err.response?.data?.msg || 'Failed to submit leave request');
-    } finally {
-      setSubmitting(false);
-    }
+      setMessage({ type: 'error', text: err.response?.data?.msg || 'Failed to submit' });
+    } finally { setSubmitLoading(false); }
   };
 
-  const getStatusClass = (status) => {
-    if (status === 'approved') return 'status-approved';
-    if (status === 'rejected') return 'status-rejected';
-    return 'status-pending';
-  };
+  const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'Asia/Kolkata' }) : '';
+  const getStatusClass = (s) => s === 'approved' ? 'leave-status-approved' : s === 'rejected' ? 'leave-status-rejected' : 'leave-status-pending';
+  const getTypeIcon = (t) => ({ casual: 'beach_access', sick: 'medical_services', emergency: 'warning', other: 'payments' }[t] || 'event_busy');
+  const getTypeColor = (t) => ({ casual: 'type-casual', sick: 'type-sick', emergency: 'type-emergency', other: 'type-paid' }[t] || 'type-casual');
 
-  if (loading) {
-    return (
-      <div className="leave-request-container">
-        <div className="leave-loading">Loading leave data...</div>
-      </div>
-    );
-  }
+  const casualRemaining = leaveStats?.remaining ?? 0;
+  const casualUsed = leaveStats?.usedThisYear ?? 0;
+  const casualTotal = leaveStats?.totalBalance ?? 18;
 
-  return (
-    <div className="leave-request-container">
-      <div className="leave-request-header">
-        <div className="header-left">
-          <h1 className="leave-request-title">Leave Requests</h1>
-          <p className="leave-request-subtitle">Track and manage your time off</p>
-        </div>
-        <button type="button" className="new-request-btn" onClick={openModal}>
-          New Request
-        </button>
-      </div>
+  const balanceCards = [
+    { label: 'Casual Leave', sub: 'Annual', icon: 'beach_access', remaining: casualRemaining, total: casualTotal, color: 'primary' },
+    { label: 'Sick Leave', sub: 'Annual', icon: 'medical_services', remaining: 8, total: 8, color: 'secondary' },
+    { label: 'Paid Leave', sub: 'Earned', icon: 'payments', remaining: 20, total: 20, color: 'tertiary-light' },
+    { label: 'WFH', sub: 'Monthly', icon: 'home_work', remaining: 4, total: 4, color: 'tertiary' },
+  ];
 
-      <div className="summary-cards">
-        <div className="summary-card">
-          <div className="card-title">Casual Leave Balance</div>
-          <div className="card-value">{stats.remaining}</div>
-          <div className="card-subtitle">
-            {stats.entitledSoFar} of {stats.totalBalance} entitled · {stats.usedThisYear} used
-            {stats.expired > 0 && <> · {stats.expired} expired</>}
-          </div>
-        </div>
-        <div className="summary-card">
-          <div className="card-title">Monthly Allowance</div>
-          <div className="card-value">{stats.perMonth}</div>
-          <div className="card-subtitle">Unused days carry forward</div>
-        </div>
-        <div className="summary-card">
-          <div className="card-title">Pending</div>
-          <div className="card-value">{stats.pendingCount}</div>
-          <div className="card-subtitle">Awaiting approval</div>
-        </div>
-      </div>
+  if (loading) return <div className="lv"><h1 className="lv-title">Leave Balance</h1><p className="lv-subtitle">Loading...</p></div>;
 
-      <div className="request-history-section">
-        <div className="history-header">
-          <img src="/images/calendar.png" alt="Calendar" className="history-icon-image" />
-          <h2 className="history-title">Request History</h2>
-        </div>
-        <div className="history-content">
-          {leaves.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-state-title">No leave requests found</div>
-              <div className="empty-state-subtitle">Create a new request to get started</div>
-            </div>
-          ) : (
-            <ul className="leave-history-list">
-              {leaves.map((leave) => (
-                <li key={leave._id} className="leave-history-item">
-                  <div className="leave-item-dates">
-                    {formatDisplayDate(leave.startDateStr)} – {formatDisplayDate(leave.endDateStr)}
-                  </div>
-                  <div className="leave-item-meta">
-                    <span className={`leave-status-badge ${getStatusClass(leave.status)}`}>
-                      {leave.status}
-                    </span>
-                    <span className="leave-item-type">{leave.type}</span>
-                    <span className="leave-item-days">
-                      {leave.days} day{leave.days !== 1 ? 's' : ''}
-                      {leave.isHalfDay && (
-                        <> · {leave.halfDaySession === 'first_half' ? 'Morning' : 'Afternoon'}</>
-                      )}
-                    </span>
-                  </div>
-                  {leave.reason && <div className="leave-item-reason">{leave.reason}</div>}
-                  {leave.adminNote && leave.status === 'rejected' && (
-                    <div className="leave-item-admin-note">Note: {leave.adminNote}</div>
-                  )}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-
-      {showModal && (
-        <div className="leave-modal-overlay" onClick={closeModal}>
-          <div className="leave-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="leave-modal-header">
-              <h2 className="leave-modal-title">New Leave Request</h2>
-              <button type="button" className="leave-modal-close" onClick={closeModal} aria-label="Close">
-                ×
-              </button>
-            </div>
-            <form onSubmit={handleSubmit} className="leave-modal-form">
-              {error && <div className="leave-form-error">{error}</div>}
-              <div className="form-group">
-                <label htmlFor="type">Leave Type</label>
-                <select
-                  id="type"
-                  name="type"
-                  value={form.type}
-                  onChange={handleChange}
-                  required
-                >
-                  {LEAVE_TYPES.map((t) => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
-                  ))}
+  if (view === 'apply') return (
+    <div className="lv">
+      <div className="lv-apply-layout">
+        <div className="lv-apply-main">
+          <h1 className="lv-title">Apply for Leave</h1>
+          <p className="lv-subtitle">Submit your request below. Approval usually takes 1-2 business days.</p>
+          {message && <div className={`lv-msg ${message.type}`}>{message.text}</div>}
+          <div className="lv-card">
+            <form className="lv-form" onSubmit={handleSubmit}>
+              <div className="lv-field"><label>Leave Type</label>
+                <select value={form.type} onChange={e => setForm({...form, type: e.target.value})}>
+                  <option value="" disabled>Select a leave type</option>
+                  <option value="casual">Casual Leave</option><option value="sick">Sick Leave</option>
+                  <option value="emergency">Emergency Leave</option><option value="other">Other</option>
                 </select>
               </div>
-              <div className="form-group half-day-toggle">
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    name="isHalfDay"
-                    checked={form.isHalfDay}
-                    onChange={handleChange}
-                  />
-                  <span>Apply for half day</span>
-                </label>
+              <div className="lv-form-row">
+                <div className="lv-field"><label>Start Date</label><input type="date" value={form.startDate} onChange={e => setForm({...form, startDate: e.target.value})} /></div>
+                <div className="lv-field"><label>End Date</label><input type="date" value={form.endDate} onChange={e => setForm({...form, endDate: e.target.value})} /></div>
               </div>
-              {form.isHalfDay && (
-                <div className="form-group">
-                  <label htmlFor="halfDaySession">Session</label>
-                  <select
-                    id="halfDaySession"
-                    name="halfDaySession"
-                    value={form.halfDaySession}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="first_half">First Half (Morning)</option>
-                    <option value="second_half">Second Half (Afternoon)</option>
-                  </select>
+              <div className="lv-field"><label>Reason for Leave</label>
+                <textarea rows={4} placeholder="Briefly describe the reason for your leave..." value={form.reason} onChange={e => setForm({...form, reason: e.target.value})} />
+              </div>
+              <div className="lv-field"><label>Supporting Documents (Optional)</label>
+                <span className="lv-hint">Required for Sick Leave exceeding 2 days.</span>
+                <div className="lv-upload"><span className="material-symbols-outlined lv-upload-icon">upload_file</span>
+                  <span className="lv-upload-text">Click to upload or drag and drop</span><span className="lv-upload-hint">PDF, JPG, PNG (Max 5MB)</span>
                 </div>
-              )}
-              <div className="form-row">
-                <div className="form-group">
-                  <label htmlFor="startDate">{form.isHalfDay ? 'Date' : 'Start Date'}</label>
-                  <input
-                    id="startDate"
-                    name="startDate"
-                    type="date"
-                    value={form.startDate}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                {!form.isHalfDay && (
-                  <div className="form-group">
-                    <label htmlFor="endDate">End Date</label>
-                    <input
-                      id="endDate"
-                      name="endDate"
-                      type="date"
-                      value={form.endDate}
-                      onChange={handleChange}
-                      min={form.startDate || undefined}
-                      required
-                    />
-                  </div>
-                )}
               </div>
-              <div className="form-group">
-                <label htmlFor="reason">Reason (optional)</label>
-                <textarea
-                  id="reason"
-                  name="reason"
-                  value={form.reason}
-                  onChange={handleChange}
-                  rows={3}
-                  placeholder="Brief reason for leave"
-                />
-              </div>
-              <div className="leave-modal-actions">
-                <button type="button" className="btn-cancel" onClick={closeModal}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn-submit" disabled={submitting}>
-                  {submitting ? 'Submitting...' : 'Submit Request'}
-                </button>
+              <div className="lv-form-actions">
+                <button type="button" className="lv-btn-cancel" onClick={() => setView('balance')}>Cancel</button>
+                <button type="submit" className="lv-btn-submit" disabled={submitLoading}>{submitLoading ? 'Submitting...' : 'Submit'}</button>
               </div>
             </form>
           </div>
         </div>
-      )}
+        <div className="lv-apply-side">
+          <div className="lv-card lv-side-balance">
+            <h3>Leave Balance</h3>
+            <div className="lv-side-list">
+              <div className="lv-side-row"><div className="lv-dot primary"></div><span>Casual Leave</span><span className="lv-days">{casualRemaining} Days</span></div>
+              <div className="lv-side-row"><div className="lv-dot sick"></div><span>Sick Leave</span><span className="lv-days">8 Days</span></div>
+              <div className="lv-side-row"><div className="lv-dot dark"></div><span>Paid Leave</span><span className="lv-days">20 Days</span></div>
+            </div>
+          </div>
+          <div className="lv-policy"><div className="lv-policy-inner"><span className="material-symbols-outlined lv-policy-icon">info</span>
+            <div><h4>Policy Reminder</h4><p>Sick leaves exceeding 2 consecutive days require a valid medical certificate uploaded as a supporting document.</p></div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="lv">
+      <div className="lv-header-row">
+        <div><h1 className="lv-title">Leave Balance</h1><p className="lv-subtitle">Track your time off and request new leaves.</p></div>
+        <button className="lv-btn-request" onClick={() => setView('apply')}>
+          <span className="material-symbols-outlined" style={{fontSize:20}}>add</span>Request Leave
+        </button>
+      </div>
+      {message && <div className={`lv-msg ${message.type}`}>{message.text}</div>}
+
+      <div className="lv-balance-grid">
+        {balanceCards.map(c => {
+          const used = c.total - c.remaining;
+          const pct = c.total > 0 ? Math.round((used / c.total) * 100) : 0;
+          return (
+            <div key={c.label} className="lv-card lv-balance-card">
+              <div className="lv-bc-top"><div className="lv-bc-info"><div className={`lv-bc-icon ${c.color}`}><span className="material-symbols-outlined" style={{fontSize:18}}>{c.icon}</span></div><span className="lv-bc-label">{c.label}</span></div><span className="lv-bc-sub">{c.sub}</span></div>
+              <div className="lv-bc-bottom"><div><div className="lv-bc-num">{String(c.remaining).padStart(2,'0')}</div><div className="lv-bc-used">of {String(c.total).padStart(2,'0')} used</div></div>
+                <svg viewBox="0 0 36 36" className={`lv-ring ${c.color}`}><path className="lv-ring-bg" d="M18 2.0845a15.9155 15.9155 0 010 31.831 15.9155 15.9155 0 010-31.831"/><path className="lv-ring-fill" d="M18 2.0845a15.9155 15.9155 0 010 31.831 15.9155 15.9155 0 010-31.831" strokeDasharray={`${pct},100`}/></svg>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="lv-history">
+        <div className="lv-history-head"><h3>Leave History</h3><button className="lv-filter-btn"><span className="material-symbols-outlined" style={{fontSize:18}}>filter_list</span>Filter</button></div>
+        <div className="lv-card"><div className="lv-table-wrap"><table className="lv-table"><thead><tr><th>Type</th><th>Dates</th><th>Duration</th><th>Status</th><th className="text-right">Action</th></tr></thead>
+          <tbody>{leaves.length === 0 ? <tr><td colSpan={5} className="lv-empty">No leave requests found</td></tr> : leaves.map(l => (
+            <tr key={l._id}><td><div className="lv-type-cell"><div className={`lv-type-icon ${getTypeColor(l.type)}`}><span className="material-symbols-outlined" style={{fontSize:18}}>{getTypeIcon(l.type)}</span></div><span className="lv-type-name">{l.type}</span></div></td>
+              <td className="text-muted">{formatDate(l.startDateStr)}{l.startDateStr !== l.endDateStr ? ` - ${formatDate(l.endDateStr)}` : ''}</td>
+              <td className="text-muted">{l.days} Day{l.days !== 1 ? 's' : ''}</td>
+              <td><span className={`lv-status ${getStatusClass(l.status)}`}>{l.status}</span></td>
+              <td className="text-right"><button className="lv-view-btn">View Details</button></td></tr>
+          ))}</tbody></table></div></div>
+      </div>
     </div>
   );
 };

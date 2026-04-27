@@ -8,6 +8,7 @@ const app = express();
 app.use(express.json({ limit: "10mb" }));
 app.use(cors({
   origin: [
+    "http://localhost:3000",
     "http://localhost:3005",
     process.env.FRONTEND_URL,
   ].filter(Boolean),
