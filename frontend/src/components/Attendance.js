@@ -101,6 +101,8 @@ const Attendance = () => {
   };
 
   const isPunchedIn = todayStatus?.checkedIn;
+  const hasRecord = todayStatus?.record || todayStatus?.checkInTime;
+  const isCheckedOut = hasRecord && !isPunchedIn;
   const checkInTime = todayStatus?.checkInTime;
   const todayRecord = todayStatus?.record;
 
@@ -183,32 +185,39 @@ const Attendance = () => {
           <div className="att-status-top">
             <div>
               <div className="att-current-status">
-                <div className={`att-status-dot ${isPunchedIn ? 'active' : ''}`}></div>
+                <div className={`att-status-dot ${isPunchedIn ? 'active' : isCheckedOut ? 'completed' : ''}`}></div>
                 <span className="att-status-label">Current Status</span>
               </div>
-              <h2 className="att-status-text">{isPunchedIn ? 'Punched In' : 'Not Punched In'}</h2>
-              {checkInTime && <p className="att-status-since">Since {formatTime(checkInTime)}</p>}
+              <h2 className="att-status-text">{isPunchedIn ? 'Punched In' : isCheckedOut ? 'Checked Out' : 'Not Punched In'}</h2>
+              {checkInTime && <p className="att-status-since">{isCheckedOut ? 'Completed for today' : `Since ${formatTime(checkInTime)}`}</p>}
             </div>
             <div className="att-status-icon-circle">
               <span className="material-symbols-outlined att-timer-icon">timer</span>
             </div>
           </div>
           <div className="att-status-actions">
-            {!isPunchedIn ? (
+            {isCheckedOut ? (
+              <span className="att-completed-text">
+                <span className="material-symbols-outlined" style={{fontSize:20, fontVariationSettings:"'FILL' 1", color:'#047857'}}>check_circle</span>
+                Day completed — {todayRecord ? getWorkHoursDisplay(todayRecord) : ''}
+              </span>
+            ) : !isPunchedIn ? (
               <button className="att-punch-btn" onClick={handlePunchIn} disabled={actionLoading}>
                 <span className="material-symbols-outlined" style={{ fontSize: 18 }}>login</span>
                 {actionLoading ? 'Punching...' : 'Punch In'}
               </button>
             ) : (
-              <button className="att-punch-btn" onClick={handlePunchOut} disabled={actionLoading}>
-                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>logout</span>
-                {actionLoading ? 'Punching...' : 'Punch Out'}
-              </button>
+              <>
+                <button className="att-punch-btn" onClick={handlePunchOut} disabled={actionLoading}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 18 }}>logout</span>
+                  {actionLoading ? 'Punching...' : 'Punch Out'}
+                </button>
+                <button className="att-break-btn">
+                  <span className="material-symbols-outlined" style={{ fontSize: 18 }}>free_breakfast</span>
+                  Start Break
+                </button>
+              </>
             )}
-            <button className="att-break-btn">
-              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>free_breakfast</span>
-              Start Break
-            </button>
           </div>
         </div>
 

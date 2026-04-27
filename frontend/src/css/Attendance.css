@@ -132,6 +132,20 @@
   animation: pulse-dot 2s infinite;
 }
 
+.att-status-dot.completed {
+  background: #0e00b9;
+}
+
+.att-completed-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #047857;
+}
+
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }

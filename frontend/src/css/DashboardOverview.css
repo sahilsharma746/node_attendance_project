@@ -198,6 +198,16 @@
   background: #4338ca;
 }
 
+.punch-completed-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #047857;
+}
+
 /* Break Toggle */
 .break-toggle {
   display: flex;
