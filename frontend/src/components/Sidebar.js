@@ -57,7 +57,7 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
       <div className="sidebar-header">
         <div className="sidebar-logo">
           <div className="logo-icon">
-            <span className="material-symbols-outlined logo-icon-symbol">domain</span>
+            <img src="/images/systum-logo.png" alt="Cloveode" className="logo-img" />
           </div>
           <div className="logo-text">
             <span className="logo-name">Cloveode</span>
