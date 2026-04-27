@@ -15,6 +15,7 @@ const AdminOverview = () => {
   const { user } = useAuth();
   const [stats, setStats] = useState({ employees: 0, pendingLeaves: 0, onLeave: 0, late: 0 });
   const [pendingLeaves, setPendingLeaves] = useState([]);
+  const [monthlyLeaveData, setMonthlyLeaveData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [announcementForm, setAnnouncementForm] = useState({ title: '', content: '', urgent: false });
   const [postLoading, setPostLoading] = useState(false);
@@ -56,6 +57,24 @@ const AdminOverview = () => {
       });
       setStats({ employees: users.length, pendingLeaves: leaves.length, onLeave: onLeave.length, late: lateCount });
       setPendingLeaves(leaves.slice(0, 3));
+
+      // Build monthly leave data (last 6 months)
+      const allLeaves = await axios.get(`${API_BASE}/api/leave/admin`);
+      const allLeavesData = Array.isArray(allLeaves.data) ? allLeaves.data : [];
+      const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const monthlyData = [];
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(year, month - 1 - i, 1);
+        const mIdx = d.getMonth();
+        const mYear = d.getFullYear();
+        const count = allLeavesData.filter(l => {
+          const start = new Date(l.startDateStr || l.startDate);
+          return start.getMonth() === mIdx && start.getFullYear() === mYear;
+        }).length;
+        monthlyData.push({ label: monthNames[mIdx], count, isCurrent: i === 0 });
+      }
+      const maxCount = Math.max(...monthlyData.map(m => m.count), 1);
+      setMonthlyLeaveData(monthlyData.map(m => ({ ...m, pct: Math.round((m.count / maxCount) * 100) })));
     } catch (err) { console.error('Admin fetch error:', err); }
     finally { setLoading(false); }
   }, [user]);
@@ -146,12 +165,12 @@ const AdminOverview = () => {
             <h3 className="adm-card-title">Org-wide Statistics</h3>
             <p className="adm-card-subtitle">Monthly leave distribution trends.</p>
             <div className="adm-chart">
-              {['J','F','M','A','M','J'].map((m, i) => (
-                <div key={m} className="adm-chart-bar-col">
-                  <div className="adm-chart-track"><div className={`adm-chart-fill ${i === 5 ? 'current' : ''}`} style={{height: `${[40,55,80,30,45,95][i]}%`}}></div></div>
-                  <span className={`adm-chart-label ${i === 5 ? 'current' : ''}`}>{m}</span>
+              {monthlyLeaveData.length > 0 ? monthlyLeaveData.map((m, i) => (
+                <div key={i} className="adm-chart-bar-col">
+                  <div className="adm-chart-track"><div className={`adm-chart-fill ${m.isCurrent ? 'current' : ''}`} style={{height: `${Math.max(m.pct, 5)}%`}}></div></div>
+                  <span className={`adm-chart-label ${m.isCurrent ? 'current' : ''}`}>{m.label}</span>
                 </div>
-              ))}
+              )) : <p className="adm-chart-empty">No data</p>}
             </div>
           </div>
 
