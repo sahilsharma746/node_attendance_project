@@ -153,7 +153,7 @@ const AdminLeaveRequests = () => {
       <div className="leave-card pending-card">
         <div className="card-header">
           <div className="card-icon pending-icon">
-            <img src="/images/pending.png" alt="Pending Approvals" className="card-icon-image" />
+            <span className="material-symbols-outlined" style={{fontSize:28}}>pending_actions</span>
           </div>
           <div className="card-title-section">
             <h3 className="card-title">Pending Approvals</h3>
@@ -164,7 +164,7 @@ const AdminLeaveRequests = () => {
           {pending.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">
-                <img src="/images/pending.png" alt="Pending Approvals" className="empty-icon-image" />
+                <span className="material-symbols-outlined" style={{fontSize:40, color:'#767589'}}>pending_actions</span>
               </div>
               <p className="empty-text">All caught up! No pending requests</p>
             </div>
@@ -179,7 +179,7 @@ const AdminLeaveRequests = () => {
       <div className="leave-card approved-card">
         <div className="card-header">
           <div className="card-icon approved-icon">
-            <img src="/images/mark.png" alt="Approved Leaves" className="card-icon-image" />
+            <span className="material-symbols-outlined" style={{fontSize:28, fontVariationSettings:"'FILL' 1", color:'#10b981'}}>check_circle</span>
           </div>
           <div className="card-title-section">
             <h3 className="card-title">Approved Leaves</h3>
@@ -190,7 +190,7 @@ const AdminLeaveRequests = () => {
           {approved.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">
-                <img src="/images/document.png" alt="Approved Leaves" className="empty-icon-image" />
+                <span className="material-symbols-outlined" style={{fontSize:40, color:'#767589'}}>description</span>
               </div>
               <p className="empty-text">No approved leaves yet</p>
             </div>
@@ -205,7 +205,7 @@ const AdminLeaveRequests = () => {
       <div className="leave-card rejected-card">
         <div className="card-header">
           <div className="card-icon rejected-icon">
-            <img src="/images/rejected.png" alt="Rejected Leaves" className="card-icon-image" />
+            <span className="material-symbols-outlined" style={{fontSize:28, fontVariationSettings:"'FILL' 1", color:'#ef4444'}}>cancel</span>
           </div>
           <div className="card-title-section">
             <h3 className="card-title">Rejected Leaves</h3>
@@ -216,7 +216,7 @@ const AdminLeaveRequests = () => {
           {rejected.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">
-                <img src="/images/document.png" alt="Rejected Leaves" className="empty-icon-image" />
+                <span className="material-symbols-outlined" style={{fontSize:40, color:'#767589'}}>description</span>
               </div>
               <p className="empty-text">No rejected leaves</p>
             </div>
