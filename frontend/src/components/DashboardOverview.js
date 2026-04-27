@@ -126,6 +126,8 @@ const DashboardOverview = () => {
   };
 
   const isPunchedIn = todayStatus?.checkedIn;
+  const hasRecord = todayStatus?.record || todayStatus?.checkInTime;
+  const isCheckedOut = hasRecord && !isPunchedIn;
   const checkInTime = todayStatus?.checkInTime;
   const totalWeekHours = weeklySummary ? (weeklySummary.daysPresentThisWeek * 9) : 0;
 
@@ -155,9 +157,9 @@ const DashboardOverview = () => {
         {/* Punch Card */}
         <div className="overview-card punch-card">
           <div className="punch-status-row">
-            <span className={`punch-badge ${isPunchedIn ? 'active' : 'inactive'}`}>
+            <span className={`punch-badge ${isPunchedIn ? 'active' : isCheckedOut ? 'completed' : 'inactive'}`}>
               <span className="punch-dot"></span>
-              {isPunchedIn ? 'Punched In' : 'Not Punched In'}
+              {isPunchedIn ? 'Punched In' : isCheckedOut ? 'Checked Out' : 'Not Punched In'}
             </span>
             <div className="punch-schedule">
               <span className="schedule-label">TODAY'S SCHEDULE</span>
@@ -170,8 +172,11 @@ const DashboardOverview = () => {
             {isPunchedIn && checkInTime && (
               <span className="timer-since">Since {formatTime(checkInTime)} today</span>
             )}
-            {!isPunchedIn && (
+            {!isPunchedIn && !isCheckedOut && (
               <span className="timer-since">Ready to start your day</span>
+            )}
+            {isCheckedOut && checkInTime && (
+              <span className="timer-since">Completed for today</span>
             )}
           </div>
 

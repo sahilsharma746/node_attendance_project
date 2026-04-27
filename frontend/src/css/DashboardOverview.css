@@ -104,6 +104,11 @@
   color: #b91c1c;
 }
 
+.punch-badge.completed {
+  background: #e1e0ff;
+  color: #0e00b9;
+}
+
 .punch-dot {
   width: 8px;
   height: 8px;
