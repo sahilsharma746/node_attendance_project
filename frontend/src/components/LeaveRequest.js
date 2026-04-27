@@ -13,7 +13,7 @@ const LeaveRequest = () => {
   const [loading, setLoading] = useState(true);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [message, setMessage] = useState(null);
-  const [form, setForm] = useState({ type: '', startDate: '', endDate: '', reason: '' });
+  const [form, setForm] = useState({ type: '', startDate: '', endDate: '', reason: '', isHalfDay: false, halfDaySession: 'first_half' });
 
   const fetchData = useCallback(async () => {
     if (!user) { setLoading(false); return; }
@@ -36,9 +36,11 @@ const LeaveRequest = () => {
     }
     setSubmitLoading(true); setMessage(null);
     try {
-      await axios.post(LEAVE_API, form);
+      const payload = { type: form.type, startDate: form.startDate, endDate: form.endDate, reason: form.reason };
+      if (form.isHalfDay) { payload.isHalfDay = true; payload.halfDaySession = form.halfDaySession; payload.endDate = form.startDate; }
+      await axios.post(LEAVE_API, payload);
       setMessage({ type: 'success', text: 'Leave request submitted successfully!' });
-      setForm({ type: '', startDate: '', endDate: '', reason: '' });
+      setForm({ type: '', startDate: '', endDate: '', reason: '', isHalfDay: false, halfDaySession: 'first_half' });
       fetchData();
       setTimeout(() => setView('balance'), 1500);
     } catch (err) {
@@ -80,9 +82,27 @@ const LeaveRequest = () => {
                   <option value="emergency">Emergency Leave</option><option value="other">Other</option>
                 </select>
               </div>
+              <div className="lv-halfday-toggle">
+                <label className="lv-toggle-label">
+                  <input type="checkbox" checked={form.isHalfDay} onChange={e => setForm({...form, isHalfDay: e.target.checked})} />
+                  <span>Half Day Leave</span>
+                </label>
+                {form.isHalfDay && (
+                  <div className="lv-halfday-options">
+                    <label className={`lv-halfday-option ${form.halfDaySession === 'first_half' ? 'active' : ''}`}>
+                      <input type="radio" name="halfDay" value="first_half" checked={form.halfDaySession === 'first_half'} onChange={e => setForm({...form, halfDaySession: e.target.value})} />
+                      First Half
+                    </label>
+                    <label className={`lv-halfday-option ${form.halfDaySession === 'second_half' ? 'active' : ''}`}>
+                      <input type="radio" name="halfDay" value="second_half" checked={form.halfDaySession === 'second_half'} onChange={e => setForm({...form, halfDaySession: e.target.value})} />
+                      Second Half
+                    </label>
+                  </div>
+                )}
+              </div>
               <div className="lv-form-row">
                 <div className="lv-field"><label>Start Date</label><input type="date" value={form.startDate} onChange={e => setForm({...form, startDate: e.target.value})} /></div>
-                <div className="lv-field"><label>End Date</label><input type="date" value={form.endDate} onChange={e => setForm({...form, endDate: e.target.value})} /></div>
+                {!form.isHalfDay && <div className="lv-field"><label>End Date</label><input type="date" value={form.endDate} onChange={e => setForm({...form, endDate: e.target.value})} /></div>}
               </div>
               <div className="lv-field"><label>Reason for Leave</label>
                 <textarea rows={4} placeholder="Briefly describe the reason for your leave..." value={form.reason} onChange={e => setForm({...form, reason: e.target.value})} />

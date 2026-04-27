@@ -89,6 +89,15 @@
 .lv-form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
 .lv-hint { font-family:'Manrope',sans-serif; font-size:12px; color:#454557; }
 
+/* Half Day Toggle */
+.lv-halfday-toggle { display:flex; flex-direction:column; gap:12px; }
+.lv-toggle-label { display:flex; align-items:center; gap:10px; font-family:'Manrope',sans-serif; font-size:14px; font-weight:600; color:#1a1c1c; cursor:pointer; }
+.lv-toggle-label input { width:18px; height:18px; accent-color:#0e00b9; cursor:pointer; }
+.lv-halfday-options { display:flex; gap:8px; }
+.lv-halfday-option { display:flex; align-items:center; gap:6px; padding:8px 16px; border-radius:8px; border:1px solid #c6c4da; background:transparent; font-family:'Manrope',sans-serif; font-size:14px; font-weight:500; color:#454557; cursor:pointer; transition:all .15s; }
+.lv-halfday-option input { display:none; }
+.lv-halfday-option.active { background:#e1e0ff; color:#0e00b9; border-color:#e1e0ff; font-weight:600; }
+
 /* File Upload */
 .lv-upload { border:2px dashed #c6c4da; border-radius:8px; padding:24px; display:flex; flex-direction:column; align-items:center; text-align:center; cursor:pointer; transition:background .15s; }
 .lv-upload:hover { background:#f3f3f3; }
