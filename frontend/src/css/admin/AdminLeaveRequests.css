@@ -1,7 +1,13 @@
 .admin-leave-requests {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .admin-leave-requests {
+    grid-template-columns: 1fr;
+  }
 }
 
 .leave-card {
