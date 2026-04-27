@@ -53,7 +53,7 @@ router.post("/", auth, async (req, res) => {
     if (!userId) {
       return res.status(401).json({ msg: "User not found in token" });
     }
-    const { type, startDate, endDate, reason, isHalfDay, halfDaySession } = req.body;
+    const { type, startDate, endDate, reason, isHalfDay, halfDaySession, document: doc, documentName } = req.body;
     if (!startDate || !endDate) {
       return res.status(400).json({ msg: "Start date and end date are required" });
     }
@@ -82,6 +82,8 @@ router.post("/", auth, async (req, res) => {
       status: "pending",
       isHalfDay: !!isHalfDay,
       halfDaySession: isHalfDay ? halfDaySession : null,
+      document: doc || "",
+      documentName: documentName || "",
     });
 
     // Send email notification to admin(s)

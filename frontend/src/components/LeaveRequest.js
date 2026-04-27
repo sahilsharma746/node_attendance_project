@@ -38,6 +38,7 @@ const LeaveRequest = () => {
     try {
       const payload = { type: form.type, startDate: form.startDate, endDate: form.endDate, reason: form.reason };
       if (form.isHalfDay) { payload.isHalfDay = true; payload.halfDaySession = form.halfDaySession; payload.endDate = form.startDate; }
+      if (form.document) { payload.document = form.document; payload.documentName = form.documentName; }
       await axios.post(LEAVE_API, payload);
       setMessage({ type: 'success', text: 'Leave request submitted successfully!' });
       setForm({ type: '', startDate: '', endDate: '', reason: '', isHalfDay: false, halfDaySession: 'first_half' });
@@ -109,9 +110,30 @@ const LeaveRequest = () => {
               </div>
               <div className="lv-field"><label>Supporting Documents (Optional)</label>
                 <span className="lv-hint">Required for Sick Leave exceeding 2 days.</span>
-                <div className="lv-upload"><span className="material-symbols-outlined lv-upload-icon">upload_file</span>
-                  <span className="lv-upload-text">Click to upload or drag and drop</span><span className="lv-upload-hint">PDF, JPG, PNG (Max 5MB)</span>
-                </div>
+                {form.documentName ? (
+                  <div className="lv-uploaded-file">
+                    <span className="material-symbols-outlined" style={{fontSize:20, color:'#047857'}}>description</span>
+                    <span className="lv-uploaded-name">{form.documentName}</span>
+                    <button type="button" className="lv-remove-file" onClick={() => setForm({...form, document: '', documentName: ''})}>
+                      <span className="material-symbols-outlined" style={{fontSize:18}}>close</span>
+                    </button>
+                  </div>
+                ) : (
+                  <label className="lv-upload">
+                    <input type="file" accept=".pdf,.jpg,.jpeg,.png" style={{display:'none'}} onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (file.size > 5 * 1024 * 1024) { setMessage({type:'error', text:'File too large. Max 5MB'}); return; }
+                      const reader = new FileReader();
+                      reader.onload = () => setForm({...form, document: reader.result, documentName: file.name});
+                      reader.readAsDataURL(file);
+                      e.target.value = '';
+                    }} />
+                    <span className="material-symbols-outlined lv-upload-icon">upload_file</span>
+                    <span className="lv-upload-text">Click to upload or drag and drop</span>
+                    <span className="lv-upload-hint">PDF, JPG, PNG (Max 5MB)</span>
+                  </label>
+                )}
               </div>
               <div className="lv-form-actions">
                 <button type="button" className="lv-btn-cancel" onClick={() => setView('balance')}>Cancel</button>

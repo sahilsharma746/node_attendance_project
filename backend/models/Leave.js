@@ -51,6 +51,14 @@ const leaveSchema = new mongoose.Schema(
       enum: ["first_half", "second_half", null],
       default: null,
     },
+    document: {
+      type: String,
+      default: "",
+    },
+    documentName: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );
