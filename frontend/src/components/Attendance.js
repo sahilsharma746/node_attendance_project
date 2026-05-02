@@ -13,6 +13,7 @@ const Attendance = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [elapsed, setElapsed] = useState({ hours: 0, minutes: 0 });
+  const [showAll, setShowAll] = useState(false);
   const timerRef = useRef(null);
 
   const formatTime = (date) => {
@@ -212,10 +213,7 @@ const Attendance = () => {
                   <span className="material-symbols-outlined" style={{ fontSize: 18 }}>logout</span>
                   {actionLoading ? 'Punching...' : 'Punch Out'}
                 </button>
-                <button className="att-break-btn">
-                  <span className="material-symbols-outlined" style={{ fontSize: 18 }}>free_breakfast</span>
-                  Start Break
-                </button>
+                {/* Break button removed — no backend support yet */}
               </>
             )}
           </div>
@@ -284,8 +282,8 @@ const Attendance = () => {
       <div className="att-card">
         <div className="att-logs-header">
           <h3>Recent Attendance Logs</h3>
-          <button className="att-filter-btn">
-            <span className="material-symbols-outlined">filter_list</span>
+          <button className="att-filter-btn" onClick={() => setShowAll(!showAll)} title={showAll ? 'Show recent' : 'Show all'}>
+            <span className="material-symbols-outlined">{showAll ? 'filter_list_off' : 'filter_list'}</span>
           </button>
         </div>
         <div className="att-table-wrapper">
@@ -304,7 +302,7 @@ const Attendance = () => {
               {history.length === 0 ? (
                 <tr><td colSpan={6} className="att-empty">No attendance records found</td></tr>
               ) : (
-                history.slice(0, 10).map((record) => {
+                (showAll ? history : history.slice(0, 10)).map((record) => {
                   const status = getStatusBadge(record);
                   return (
                     <tr key={record.id || record._id}>

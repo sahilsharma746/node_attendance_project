@@ -63,7 +63,6 @@ const AdminAttendance = () => {
     }
   }, []);
 
-  console.log(users);  
   useEffect(() => {
     fetchRecords();
   }, [fetchRecords]);

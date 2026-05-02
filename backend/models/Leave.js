@@ -51,6 +51,22 @@ const leaveSchema = new mongoose.Schema(
       enum: ["first_half", "second_half", null],
       default: null,
     },
+    isShortBreak: {
+      type: Boolean,
+      default: false,
+    },
+    breakHours: {
+      type: Number,
+      default: null,
+    },
+    breakFromTime: {
+      type: String,
+      default: "",
+    },
+    breakToTime: {
+      type: String,
+      default: "",
+    },
     document: {
       type: String,
       default: "",

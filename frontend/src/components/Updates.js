@@ -81,25 +81,18 @@ const Updates = () => {
                       {formatDate(u.createdAt)}
                     </span>
                   </div>
-                  <span className="up-tag">{i === 0 ? 'Policy' : i % 2 === 0 ? 'News' : 'Event'}</span>
+                  <span className="up-tag">Announcement</span>
                 </div>
 
                 <h2 className={`up-article-title ${i === 0 ? 'large' : ''}`}>{u.title}</h2>
                 <p className="up-article-body">{u.content}</p>
 
-                {i === 0 && u.createdByName && (
+                {u.createdByName && (
                   <div className="up-article-footer">
                     <div className="up-author">
                       <div className="up-author-avatar">{(u.createdByName || 'A').charAt(0)}</div>
                       <span className="up-author-name">{u.createdByName}</span>
                     </div>
-                    <a className="up-read-more" href="#">Read Full Policy <span className="material-symbols-outlined" style={{fontSize:18}}>arrow_forward</span></a>
-                  </div>
-                )}
-
-                {i !== 0 && (
-                  <div className="up-article-action">
-                    <a className="up-read-more" href="#">Read More <span className="material-symbols-outlined" style={{fontSize:18}}>arrow_forward</span></a>
                   </div>
                 )}
               </article>
@@ -116,10 +109,7 @@ const Updates = () => {
               Categories
             </h3>
             <ul className="up-cat-list">
-              <li className="up-cat-item"><span>Policy Updates</span><span className="up-cat-count">{updates.length}</span></li>
-              <li className="up-cat-item"><span>Company News</span><span className="up-cat-count">0</span></li>
-              <li className="up-cat-item"><span>Events & Summits</span><span className="up-cat-count">0</span></li>
-              <li className="up-cat-item"><span>System Maintenance</span><span className="up-cat-count">0</span></li>
+              <li className="up-cat-item"><span>All Announcements</span><span className="up-cat-count">{updates.length}</span></li>
             </ul>
           </div>
 
@@ -137,7 +127,7 @@ const Updates = () => {
                 </li>
               ))}
             </ul>
-            <button className="up-view-older">View Older</button>
+            {/* View Older removed — all updates already shown */}
           </div>
         </aside>
       </div>

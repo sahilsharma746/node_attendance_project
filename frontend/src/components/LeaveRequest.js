@@ -13,7 +13,9 @@ const LeaveRequest = () => {
   const [loading, setLoading] = useState(true);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [message, setMessage] = useState(null);
-  const [form, setForm] = useState({ type: '', startDate: '', endDate: '', reason: '', isHalfDay: false, halfDaySession: 'first_half' });
+  const [selectedLeave, setSelectedLeave] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [form, setForm] = useState({ type: '', startDate: '', endDate: '', reason: '', isHalfDay: false, halfDaySession: 'first_half', isShortBreak: false, breakHours: 1, breakFromTime: '', breakToTime: '' });
 
   const fetchData = useCallback(async () => {
     if (!user) { setLoading(false); return; }
@@ -31,17 +33,18 @@ const LeaveRequest = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.type || !form.startDate || !form.endDate) {
+    if (!form.type || !form.startDate || (!form.isShortBreak && !form.endDate)) {
       setMessage({ type: 'error', text: 'Please fill all required fields' }); return;
     }
     setSubmitLoading(true); setMessage(null);
     try {
-      const payload = { type: form.type, startDate: form.startDate, endDate: form.endDate, reason: form.reason };
+      const payload = { type: form.type, startDate: form.startDate, endDate: form.isShortBreak ? form.startDate : form.endDate, reason: form.reason };
       if (form.isHalfDay) { payload.isHalfDay = true; payload.halfDaySession = form.halfDaySession; payload.endDate = form.startDate; }
+      if (form.isShortBreak) { payload.isShortBreak = true; payload.breakHours = form.breakHours; payload.breakFromTime = form.breakFromTime; payload.breakToTime = form.breakToTime; payload.endDate = form.startDate; }
       if (form.document) { payload.document = form.document; payload.documentName = form.documentName; }
       await axios.post(LEAVE_API, payload);
-      setMessage({ type: 'success', text: 'Leave request submitted successfully!' });
-      setForm({ type: '', startDate: '', endDate: '', reason: '', isHalfDay: false, halfDaySession: 'first_half' });
+      setMessage({ type: 'success', text: form.isShortBreak ? 'Short break request submitted!' : 'Leave request submitted successfully!' });
+      setForm({ type: '', startDate: '', endDate: '', reason: '', isHalfDay: false, halfDaySession: 'first_half', isShortBreak: false, breakHours: 1, breakFromTime: '', breakToTime: '' });
       fetchData();
       setTimeout(() => setView('balance'), 1500);
     } catch (err) {
@@ -57,13 +60,7 @@ const LeaveRequest = () => {
   const casualRemaining = leaveStats?.remaining ?? 0;
   const casualUsed = leaveStats?.usedThisYear ?? 0;
   const casualTotal = leaveStats?.totalBalance ?? 18;
-
-  const balanceCards = [
-    { label: 'Casual Leave', sub: 'Annual', icon: 'beach_access', remaining: casualRemaining, total: casualTotal, color: 'primary' },
-    { label: 'Sick Leave', sub: 'Annual', icon: 'medical_services', remaining: 8, total: 8, color: 'secondary' },
-    { label: 'Paid Leave', sub: 'Earned', icon: 'payments', remaining: 20, total: 20, color: 'tertiary-light' },
-    { label: 'WFH', sub: 'Monthly', icon: 'home_work', remaining: 4, total: 4, color: 'tertiary' },
-  ];
+  const casualEntitled = leaveStats?.entitledSoFar ?? 0;
 
   if (loading) return <div className="lv"><h1 className="lv-title">Leave Balance</h1><p className="lv-subtitle">Loading...</p></div>;
 
@@ -83,27 +80,62 @@ const LeaveRequest = () => {
                   <option value="emergency">Emergency Leave</option><option value="other">Other</option>
                 </select>
               </div>
-              <div className="lv-halfday-toggle">
-                <label className="lv-toggle-label">
-                  <input type="checkbox" checked={form.isHalfDay} onChange={e => setForm({...form, isHalfDay: e.target.checked})} />
-                  <span>Half Day Leave</span>
+              <div className="lv-duration-toggles">
+                <label className={`lv-duration-option ${!form.isHalfDay && !form.isShortBreak ? 'active' : ''}`}>
+                  <input type="radio" name="duration" checked={!form.isHalfDay && !form.isShortBreak} onChange={() => setForm({...form, isHalfDay: false, isShortBreak: false})} />
+                  <span className="material-symbols-outlined" style={{fontSize:18}}>event</span>
+                  Full Day
                 </label>
-                {form.isHalfDay && (
-                  <div className="lv-halfday-options">
-                    <label className={`lv-halfday-option ${form.halfDaySession === 'first_half' ? 'active' : ''}`}>
-                      <input type="radio" name="halfDay" value="first_half" checked={form.halfDaySession === 'first_half'} onChange={e => setForm({...form, halfDaySession: e.target.value})} />
-                      First Half
-                    </label>
-                    <label className={`lv-halfday-option ${form.halfDaySession === 'second_half' ? 'active' : ''}`}>
-                      <input type="radio" name="halfDay" value="second_half" checked={form.halfDaySession === 'second_half'} onChange={e => setForm({...form, halfDaySession: e.target.value})} />
-                      Second Half
-                    </label>
-                  </div>
-                )}
+                <label className={`lv-duration-option ${form.isHalfDay ? 'active' : ''}`}>
+                  <input type="radio" name="duration" checked={form.isHalfDay} onChange={() => setForm({...form, isHalfDay: true, isShortBreak: false})} />
+                  <span className="material-symbols-outlined" style={{fontSize:18}}>timelapse</span>
+                  Half Day
+                </label>
+                <label className={`lv-duration-option ${form.isShortBreak ? 'active' : ''}`}>
+                  <input type="radio" name="duration" checked={form.isShortBreak} onChange={() => setForm({...form, isShortBreak: true, isHalfDay: false})} />
+                  <span className="material-symbols-outlined" style={{fontSize:18}}>coffee</span>
+                  Short Break
+                </label>
               </div>
+              {form.isHalfDay && (
+                <div className="lv-halfday-options">
+                  <label className={`lv-halfday-option ${form.halfDaySession === 'first_half' ? 'active' : ''}`}>
+                    <input type="radio" name="halfDay" value="first_half" checked={form.halfDaySession === 'first_half'} onChange={e => setForm({...form, halfDaySession: e.target.value})} />
+                    First Half
+                  </label>
+                  <label className={`lv-halfday-option ${form.halfDaySession === 'second_half' ? 'active' : ''}`}>
+                    <input type="radio" name="halfDay" value="second_half" checked={form.halfDaySession === 'second_half'} onChange={e => setForm({...form, halfDaySession: e.target.value})} />
+                    Second Half
+                  </label>
+                </div>
+              )}
+              {form.isShortBreak && (
+                <div className="lv-break-section">
+                  <div className="lv-break-hours">
+                    <label>Break Duration</label>
+                    <div className="lv-break-options">
+                      {[1, 2, 3].map(h => (
+                        <button key={h} type="button" className={`lv-break-btn ${form.breakHours === h ? 'active' : ''}`} onClick={() => setForm({...form, breakHours: h})}>
+                          {h} {h === 1 ? 'Hour' : 'Hours'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="lv-break-time-row">
+                    <div className="lv-field">
+                      <label>From Time</label>
+                      <input type="time" value={form.breakFromTime} onChange={e => setForm({...form, breakFromTime: e.target.value})} />
+                    </div>
+                    <div className="lv-field">
+                      <label>To Time</label>
+                      <input type="time" value={form.breakToTime} onChange={e => setForm({...form, breakToTime: e.target.value})} />
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="lv-form-row">
-                <div className="lv-field"><label>Start Date</label><input type="date" value={form.startDate} onChange={e => setForm({...form, startDate: e.target.value})} /></div>
-                {!form.isHalfDay && <div className="lv-field"><label>End Date</label><input type="date" value={form.endDate} onChange={e => setForm({...form, endDate: e.target.value})} /></div>}
+                <div className="lv-field"><label>{form.isShortBreak ? 'Date' : 'Start Date'}</label><input type="date" value={form.startDate} min={new Date().toISOString().slice(0, 10)} onChange={e => setForm({...form, startDate: e.target.value})} /></div>
+                {!form.isHalfDay && !form.isShortBreak && <div className="lv-field"><label>End Date</label><input type="date" value={form.endDate} min={form.startDate || new Date().toISOString().slice(0, 10)} onChange={e => setForm({...form, endDate: e.target.value})} /></div>}
               </div>
               <div className="lv-field"><label>Reason for Leave</label>
                 <textarea rows={4} placeholder="Briefly describe the reason for your leave..." value={form.reason} onChange={e => setForm({...form, reason: e.target.value})} />
@@ -147,8 +179,8 @@ const LeaveRequest = () => {
             <h3>Leave Balance</h3>
             <div className="lv-side-list">
               <div className="lv-side-row"><div className="lv-dot primary"></div><span>Casual Leave</span><span className="lv-days">{casualRemaining} Days</span></div>
-              <div className="lv-side-row"><div className="lv-dot sick"></div><span>Sick Leave</span><span className="lv-days">8 Days</span></div>
-              <div className="lv-side-row"><div className="lv-dot dark"></div><span>Paid Leave</span><span className="lv-days">20 Days</span></div>
+              {/* <div className="lv-side-row"><div className="lv-dot sick"></div><span>Sick Leave</span><span className="lv-days">8 Days</span></div> */}
+              {/* <div className="lv-side-row"><div className="lv-dot dark"></div><span>Paid Leave</span><span className="lv-days">20 Days</span></div> */}
             </div>
           </div>
           <div className="lv-policy"><div className="lv-policy-inner"><span className="material-symbols-outlined lv-policy-icon">info</span>
@@ -170,29 +202,46 @@ const LeaveRequest = () => {
       {message && <div className={`lv-msg ${message.type}`}>{message.text}</div>}
 
       <div className="lv-balance-grid">
-        {balanceCards.map(c => {
-          const used = c.total - c.remaining;
-          const pct = c.total > 0 ? Math.round((used / c.total) * 100) : 0;
-          return (
-            <div key={c.label} className="lv-card lv-balance-card">
-              <div className="lv-bc-top"><div className="lv-bc-info"><div className={`lv-bc-icon ${c.color}`}><span className="material-symbols-outlined" style={{fontSize:18}}>{c.icon}</span></div><span className="lv-bc-label">{c.label}</span></div><span className="lv-bc-sub">{c.sub}</span></div>
-              <div className="lv-bc-bottom"><div><div className="lv-bc-num">{String(c.remaining).padStart(2,'0')}</div><div className="lv-bc-used">of {String(c.total).padStart(2,'0')} used</div></div>
-                <svg viewBox="0 0 36 36" className={`lv-ring ${c.color}`}><path className="lv-ring-bg" d="M18 2.0845a15.9155 15.9155 0 010 31.831 15.9155 15.9155 0 010-31.831"/><path className="lv-ring-fill" d="M18 2.0845a15.9155 15.9155 0 010 31.831 15.9155 15.9155 0 010-31.831" strokeDasharray={`${pct},100`}/></svg>
-              </div>
-            </div>
-          );
-        })}
+        <div className="lv-card lv-balance-hero">
+          <h3 className="lv-hero-title">Casual Leave Balance</h3>
+          <div className="lv-hero-num">{casualRemaining}</div>
+          <p className="lv-hero-sub">{casualUsed} used out of {casualEntitled} earned ({casualTotal} annual)</p>
+          <div className="lv-hero-bar">
+            <div className="lv-hero-bar-fill" style={{ width: `${casualTotal > 0 ? Math.min((casualUsed / casualTotal) * 100, 100) : 0}%` }}></div>
+          </div>
+        </div>
       </div>
 
       <div className="lv-history">
-        <div className="lv-history-head"><h3>Leave History</h3><button className="lv-filter-btn"><span className="material-symbols-outlined" style={{fontSize:18}}>filter_list</span>Filter</button></div>
+        <div className="lv-history-head"><h3>Leave History</h3>
+          <div className="lv-filter-group">
+            {['all', 'pending', 'approved', 'rejected'].map(s => (
+              <button key={s} className={`lv-filter-chip ${statusFilter === s ? 'active' : ''}`} onClick={() => setStatusFilter(s)}>
+                {s === 'all' ? 'All' : s.charAt(0).toUpperCase() + s.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="lv-card"><div className="lv-table-wrap"><table className="lv-table"><thead><tr><th>Type</th><th>Dates</th><th>Duration</th><th>Status</th><th className="text-right">Action</th></tr></thead>
-          <tbody>{leaves.length === 0 ? <tr><td colSpan={5} className="lv-empty">No leave requests found</td></tr> : leaves.map(l => (
-            <tr key={l._id}><td><div className="lv-type-cell"><div className={`lv-type-icon ${getTypeColor(l.type)}`}><span className="material-symbols-outlined" style={{fontSize:18}}>{getTypeIcon(l.type)}</span></div><span className="lv-type-name">{l.type}</span></div></td>
+          <tbody>{leaves.filter(l => statusFilter === 'all' || l.status === statusFilter).length === 0 ? <tr><td colSpan={5} className="lv-empty">No leave requests found</td></tr> : leaves.filter(l => statusFilter === 'all' || l.status === statusFilter).map(l => (
+            <React.Fragment key={l._id}>
+            <tr><td><div className="lv-type-cell"><div className={`lv-type-icon ${getTypeColor(l.type)}`}><span className="material-symbols-outlined" style={{fontSize:18}}>{getTypeIcon(l.type)}</span></div><span className="lv-type-name">{l.type}</span></div></td>
               <td className="text-muted">{formatDate(l.startDateStr)}{l.startDateStr !== l.endDateStr ? ` - ${formatDate(l.endDateStr)}` : ''}</td>
-              <td className="text-muted">{l.days} Day{l.days !== 1 ? 's' : ''}</td>
+              <td className="text-muted">{l.isShortBreak ? `${l.breakHours}h Break` : `${l.days} Day${l.days !== 1 ? 's' : ''}`}</td>
               <td><span className={`lv-status ${getStatusClass(l.status)}`}>{l.status}</span></td>
-              <td className="text-right"><button className="lv-view-btn">View Details</button></td></tr>
+              <td className="text-right"><button className="lv-view-btn" onClick={() => setSelectedLeave(selectedLeave?._id === l._id ? null : l)}>View Details</button></td></tr>
+              {selectedLeave?._id === l._id && (
+                <tr><td colSpan={5} className="lv-detail-row">
+                  <div className="lv-detail-box">
+                    <p><strong>Reason:</strong> {l.reason || 'No reason provided'}</p>
+                    {l.isHalfDay && <p><strong>Half Day:</strong> {l.halfDaySession === 'first_half' ? 'First Half' : 'Second Half'}</p>}
+                    {l.isShortBreak && <p><strong>Short Break:</strong> {l.breakHours} {l.breakHours === 1 ? 'Hour' : 'Hours'}{l.breakFromTime && l.breakToTime ? ` (${l.breakFromTime} - ${l.breakToTime})` : ''}</p>}
+                    {l.adminNote && <p><strong>Admin Note:</strong> {l.adminNote}</p>}
+                    <p><strong>Applied:</strong> {formatDate(l.createdAt)}</p>
+                  </div>
+                </td></tr>
+              )}
+            </React.Fragment>
           ))}</tbody></table></div></div>
       </div>
     </div>

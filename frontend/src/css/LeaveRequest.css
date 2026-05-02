@@ -70,7 +70,43 @@
 .leave-status-rejected { background:#ffdad6; color:#93000a; }
 .lv-view-btn { background:none; border:none; color:#0e00b9; font-family:'Manrope',sans-serif; font-size:14px; font-weight:600; cursor:pointer; }
 .lv-view-btn:hover { text-decoration:underline; }
+/* Balance Hero Card */
+.lv-balance-hero { text-align:center; padding:32px 24px; }
+.lv-hero-title { font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:600; color:#1a1c1c; margin:0 0 16px; }
+.lv-hero-num { font-family:'Space Grotesk',sans-serif; font-size:56px; font-weight:700; color:#1a1c1c; line-height:1; margin-bottom:8px; }
+.lv-hero-sub { font-family:'Manrope',sans-serif; font-size:15px; color:#767589; margin:0 0 20px; }
+.lv-hero-bar { width:100%; max-width:300px; height:8px; background:#e8e8f0; border-radius:4px; margin:0 auto; overflow:hidden; }
+.lv-hero-bar-fill { height:100%; background:#0e00b9; border-radius:4px; transition:width .3s; }
+
 .lv-empty { text-align:center; padding:40px; color:#767589; }
+.lv-detail-row { padding:0 !important; }
+.lv-detail-box { background:#f8f8ff; padding:16px 20px; border-left:3px solid #0e00b9; margin:4px 0; font-family:'Manrope',sans-serif; font-size:13px; color:#454557; }
+.lv-detail-box p { margin:4px 0; }
+.lv-detail-box strong { color:#1a1c1c; }
+.lv-filter-group { display:flex; gap:6px; }
+.lv-filter-chip { padding:5px 12px; border-radius:6px; border:1px solid #c6c4da; background:transparent; font-family:'Manrope',sans-serif; font-size:13px; font-weight:600; color:#454557; cursor:pointer; transition:all .15s; }
+.lv-filter-chip.active { background:#0e00b9; color:white; border-color:#0e00b9; }
+.lv-filter-chip:hover:not(.active) { background:#f3f3f3; }
+
+/* Duration Toggles */
+.lv-duration-toggles { display:flex; gap:8px; margin-bottom:16px; }
+.lv-duration-option { display:flex; align-items:center; gap:6px; padding:10px 16px; border-radius:8px; border:1px solid #c6c4da; background:white; font-family:'Manrope',sans-serif; font-size:13px; font-weight:600; color:#454557; cursor:pointer; transition:all .15s; flex:1; justify-content:center; }
+.lv-duration-option input { display:none; }
+.lv-duration-option.active { background:#0e00b9; color:white; border-color:#0e00b9; }
+.lv-duration-option:hover:not(.active) { background:#f3f3f3; }
+
+/* Break Hours */
+.lv-break-hours { margin-bottom:16px; }
+.lv-break-hours label { display:block; font-family:'Manrope',sans-serif; font-size:14px; font-weight:500; color:#454557; margin-bottom:8px; }
+.lv-break-options { display:flex; gap:8px; }
+.lv-break-btn { padding:10px 20px; border-radius:8px; border:1px solid #c6c4da; background:white; font-family:'Manrope',sans-serif; font-size:14px; font-weight:600; color:#454557; cursor:pointer; transition:all .15s; flex:1; }
+.lv-break-btn.active { background:#0e00b9; color:white; border-color:#0e00b9; }
+.lv-break-btn:hover:not(.active) { background:#f3f3f3; }
+.lv-break-section { display:flex; flex-direction:column; gap:16px; margin-bottom:16px; }
+.lv-break-time-row { display:flex; gap:16px; }
+.lv-break-time-row .lv-field { flex:1; }
+.lv-break-time-row input[type="time"] { width:100%; padding:10px 12px; border:1px solid #c6c4da; border-radius:8px; font-family:'Manrope',sans-serif; font-size:14px; box-sizing:border-box; }
+.lv-break-time-row input[type="time"]:focus { outline:none; border-color:#0e00b9; box-shadow:0 0 0 3px rgba(14,0,185,0.1); }
 
 /* Apply Form Layout */
 .lv-apply-layout { display:flex; gap:24px; }

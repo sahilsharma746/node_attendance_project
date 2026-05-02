@@ -10,6 +10,8 @@ const AdminEmployees = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -116,187 +118,153 @@ const AdminEmployees = () => {
     }
   };
 
+  const filteredUsers = users.filter(u => {
+    const matchesSearch = searchQuery === '' ||
+      u.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.email?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesRole = roleFilter === 'all' || u.role === roleFilter;
+    return matchesSearch && matchesRole;
+  });
+
+  const adminCount = users.filter(u => u.role === 'admin').length;
+  const employeeCount = users.filter(u => u.role === 'employee').length;
+
   return (
     <div className="admin-employees">
-      <div className="employees-card">
-        <div className="card-header-section">
-          <h2 className="section-title">Employee Directory</h2>
-          <button type="button" className="create-user-btn" onClick={openModal}>
-            Create User
-          </button>
+      {/* Header */}
+      <div className="emp-header">
+        <div>
+          <h1 className="emp-title">Employee Directory</h1>
+          <p className="emp-subtitle">Manage your team members and their roles.</p>
         </div>
+        <button type="button" className="emp-create-btn" onClick={openModal}>
+          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>person_add</span>
+          Create User
+        </button>
+      </div>
 
-        {message.text && (
-          <div className={`admin-message ${message.type}`}>{message.text}</div>
-        )}
+      {message.text && (
+        <div className={`admin-message ${message.type}`}>{message.text}</div>
+      )}
 
-        <div className="table-container">
-          {loading ? (
-            <p className="admin-loading">Loading users...</p>
-          ) : (
-            <table className="employees-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Role</th>
-                  <th>Email</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="empty-row">
-                      No users yet. Create one as admin.
-                    </td>
-                  </tr>
-                ) : (
-                  users.map((u) => (
-                    <tr key={u._id}>
-                      <td>
-                        <div className="employee-cell">
-                          <div className="avatar">
-                            {u.profilePic ? (
-                              <img src={u.profilePic} alt="" />
-                            ) : (
-                              getInitials(u.name)
-                            )}
-                          </div>
-                          <div className="employee-name-info">
-                            <span className="employee-name">{u.name}</span>
-                            <span className="employee-username">{u.email}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <span className={`role-badge role-${u.role}`}>{u.role}</span>
-                      </td>
-                      <td>{u.email}</td>
-                      <td>
-                        <span className="status-badge active">
-                          <span className="status-dot" />
-                          ACTIVE
-                        </span>
-                      </td>
-                      <td>
-                        <button
-                          type="button"
-                          className="admin-delete-employee-btn"
-                          onClick={() => handleDelete(u)}
-                          disabled={deletingId === u._id}
-                          title="Delete employee"
-                        >
-                          {deletingId === u._id ? 'Deleting...' : 'Delete'}
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          )}
+      {/* Stats */}
+      <div className="emp-stats">
+        <div className="emp-stat-card">
+          <span className="emp-stat-num">{users.length}</span>
+          <span className="emp-stat-label">Total Members</span>
+        </div>
+        <div className="emp-stat-card">
+          <span className="emp-stat-num">{adminCount}</span>
+          <span className="emp-stat-label">Admins</span>
+        </div>
+        <div className="emp-stat-card">
+          <span className="emp-stat-num">{employeeCount}</span>
+          <span className="emp-stat-label">Employees</span>
         </div>
       </div>
 
+      {/* Filters */}
+      <div className="emp-filters">
+        <div className="emp-search">
+          <span className="material-symbols-outlined emp-search-icon">search</span>
+          <input
+            type="text"
+            placeholder="Search by name or email..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="emp-search-input"
+          />
+        </div>
+        <div className="emp-role-chips">
+          <button className={`emp-chip ${roleFilter === 'all' ? 'active' : ''}`} onClick={() => setRoleFilter('all')}>All</button>
+          <button className={`emp-chip ${roleFilter === 'admin' ? 'active' : ''}`} onClick={() => setRoleFilter('admin')}>Admins</button>
+          <button className={`emp-chip ${roleFilter === 'employee' ? 'active' : ''}`} onClick={() => setRoleFilter('employee')}>Employees</button>
+        </div>
+      </div>
+
+      {/* Grid */}
+      {loading ? (
+        <p className="admin-loading">Loading users...</p>
+      ) : filteredUsers.length === 0 ? (
+        <div className="emp-empty-card"><p>No team members found</p></div>
+      ) : (
+        <div className="emp-grid">
+          {filteredUsers.map((u) => (
+            <div key={u._id} className="emp-card">
+              <div className={`emp-role-badge role-${u.role}`}>
+                {u.role === 'admin' ? 'Admin' : 'Employee'}
+              </div>
+              <div className="emp-card-avatar">
+                {u.profilePic ? (
+                  <img src={u.profilePic} alt="" />
+                ) : (
+                  <div className="emp-avatar-initials">{getInitials(u.name)}</div>
+                )}
+              </div>
+              <h3 className="emp-card-name">{u.name}</h3>
+              <p className="emp-card-email">{u.email}</p>
+              <div className="emp-card-footer">
+                <span className="emp-status-badge">
+                  <span className="emp-status-dot"></span>
+                  Active
+                </span>
+                <button
+                  type="button"
+                  className="emp-delete-btn"
+                  onClick={() => handleDelete(u)}
+                  disabled={deletingId === u._id}
+                  title="Delete employee"
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
+                  {deletingId === u._id ? 'Deleting...' : 'Remove'}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Create User Modal */}
       {modalOpen && (
         <div className="admin-modal-overlay" onClick={() => setModalOpen(false)}>
-          <div
-            className="admin-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
             <div className="admin-modal-header">
               <h3>Create User</h3>
-              <button
-                type="button"
-                className="admin-modal-close"
-                onClick={() => setModalOpen(false)}
-                aria-label="Close"
-              >
-                ×
+              <button type="button" className="admin-modal-close" onClick={() => setModalOpen(false)} aria-label="Close">
+                <span className="material-symbols-outlined">close</span>
               </button>
             </div>
-            <p className="admin-modal-hint">As an admin, you can create new employees or other admins. Choose the role below.</p>
+            <p className="admin-modal-hint">As an admin, you can create new employees or other admins.</p>
             {message.text && (
               <div className={`admin-message ${message.type}`}>{message.text}</div>
             )}
             <form onSubmit={handleSubmit} className="admin-modal-form">
               <div className="form-group">
                 <label htmlFor="create-name">Full Name</label>
-                <input
-                  id="create-name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  placeholder="Full name"
-                />
+                <input id="create-name" name="name" value={formData.name} onChange={handleChange} required placeholder="Full name" />
               </div>
               <div className="form-group">
                 <label htmlFor="create-email">Email</label>
-                <input
-                  id="create-email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  placeholder="email@example.com"
-                />
+                <input id="create-email" name="email" type="email" value={formData.email} onChange={handleChange} required placeholder="email@example.com" />
               </div>
               <div className="form-group">
                 <label htmlFor="create-role">Role</label>
-                <select
-                  id="create-role"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                >
+                <select id="create-role" name="role" value={formData.role} onChange={handleChange}>
                   <option value="employee">Employee</option>
                   <option value="admin">Admin</option>
                 </select>
               </div>
               <div className="form-group">
                 <label htmlFor="create-password">Password</label>
-                <input
-                  id="create-password"
-                  name="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  minLength={6}
-                  placeholder="Min 6 characters"
-                />
+                <input id="create-password" name="password" type="password" value={formData.password} onChange={handleChange} required minLength={6} placeholder="Min 6 characters" />
               </div>
               <div className="form-group">
                 <label htmlFor="create-confirmPassword">Confirm Password</label>
-                <input
-                  id="create-confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required
-                  minLength={6}
-                  placeholder="Confirm password"
-                />
+                <input id="create-confirmPassword" name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleChange} required minLength={6} placeholder="Confirm password" />
               </div>
               <div className="admin-modal-actions">
-                <button
-                  type="button"
-                  className="admin-modal-btn secondary"
-                  onClick={() => setModalOpen(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="admin-modal-btn primary"
-                  disabled={submitting}
-                >
-                  {submitting ? 'Creating...' : 'Create User'}
-                </button>
+                <button type="button" className="admin-modal-btn secondary" onClick={() => setModalOpen(false)}>Cancel</button>
+                <button type="submit" className="admin-modal-btn primary" disabled={submitting}>{submitting ? 'Creating...' : 'Create User'}</button>
               </div>
             </form>
           </div>

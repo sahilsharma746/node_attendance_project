@@ -28,6 +28,9 @@
 .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); grid-auto-rows:minmax(120px,auto); background:#e2e2e2; gap:1px; }
 .cal-cell { background:white; padding:8px; display:flex; flex-direction:column; gap:4px; }
 .cal-cell.other-month { opacity:0.5; }
+.cal-cell.weekend { background:#f5f5fa; }
+.cal-cell.weekend .cal-day-num { color:#9a98b0; }
+.cal-day-name.weekend { color:#9a98b0; }
 .cal-cell.today { box-shadow:inset 0 0 0 2px #0e00b9; border-radius:2px; }
 .cal-day-num { font-family:'Manrope',sans-serif; font-size:14px; font-weight:600; color:#454557; text-align:right; padding:4px; }
 .cal-day-num.today { color:#0e00b9; font-weight:700; }
@@ -51,6 +54,27 @@
 .cal-legend-dot.pending { background:#353535; box-shadow:0 0 0 3px rgba(53,53,53,0.2); }
 .cal-legend-dot.holiday { background:#ff6060; box-shadow:0 0 0 3px rgba(255,96,96,0.2); }
 .cal-legend-dot.event { background:#1e13f3; box-shadow:0 0 0 3px rgba(30,19,243,0.2); }
+
+/* Week View */
+.cal-grid.week-view { grid-auto-rows:minmax(200px,auto); }
+
+/* Selected Day Detail */
+.cal-detail-card { }
+.cal-detail-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.cal-detail-header .cal-card-title { margin:0; }
+.cal-close-btn { width:28px; height:28px; border-radius:50%; border:none; background:transparent; color:#454557; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .15s; }
+.cal-close-btn:hover { background:#f3f3f3; }
+.cal-detail-list { display:flex; flex-direction:column; gap:8px; }
+.cal-detail-item { display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border-radius:6px; font-family:'Manrope',sans-serif; font-size:13px; font-weight:500; }
+.cal-detail-label { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cal-detail-status { font-size:11px; font-weight:600; padding:2px 8px; border-radius:4px; margin-left:8px; flex-shrink:0; }
+.cal-detail-item.cal-event-approved .cal-detail-status { background:rgba(14,0,185,0.1); color:#0e00b9; }
+.cal-detail-item.cal-event-pending .cal-detail-status { background:#e2e2e2; color:#1a1c1c; }
+
+/* Clickable cells */
+.cal-cell { cursor:pointer; transition:background .15s; }
+.cal-cell:hover { background:#f8f8ff; }
+.cal-cell.selected { box-shadow:inset 0 0 0 2px #1e13f3; border-radius:2px; }
 
 /* Events List */
 .cal-events-card { flex:1; }

@@ -205,15 +205,7 @@ const DashboardOverview = () => {
                 {actionLoading ? 'Punching...' : 'Punch Out'}
               </button>
             )}
-            {isPunchedIn && (
-              <div className="break-toggle">
-                <span className="break-label">On Break</span>
-                <label className="toggle-switch">
-                  <input type="checkbox" />
-                  <span className="toggle-slider"></span>
-                </label>
-              </div>
-            )}
+            {/* Break toggle removed — no backend support yet */}
           </div>
         </div>
 
@@ -221,29 +213,16 @@ const DashboardOverview = () => {
         <div className="overview-card leave-balance-card">
           <div className="leave-balance-header">
             <h3>Leave Balance</h3>
-            <Link to="/dashboard/leave" className="leave-request-link">Request</Link>
+            <Link to="/dashboard/leave-request" className="leave-request-link">Request</Link>
           </div>
-          <div className="leave-balance-items">
-            <div className="leave-balance-item">
-              <div className="leave-icon casual">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
-              </div>
-              <span className="leave-type-name">Casual Leave</span>
-              <span className="leave-type-count">{leaveStats?.remaining ?? 0}</span>
-            </div>
-            <div className="leave-balance-item">
-              <div className="leave-icon sick">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
-              </div>
-              <span className="leave-type-name">Sick Leave</span>
-              <span className="leave-type-count">8</span>
-            </div>
-            <div className="leave-balance-item">
-              <div className="leave-icon paid">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-              </div>
-              <span className="leave-type-name">Paid Leave</span>
-              <span className="leave-type-count">12</span>
+          <div className="leave-balance-hero">
+            <span className="leave-hero-num">{leaveStats?.remaining ?? 0}</span>
+            <span className="leave-hero-label">days remaining</span>
+            <p className="leave-hero-detail">
+              {leaveStats?.usedThisYear ?? 0} used out of {leaveStats?.entitledSoFar ?? 0} earned ({leaveStats?.totalBalance ?? 18} annual)
+            </p>
+            <div className="leave-hero-bar">
+              <div className="leave-hero-bar-fill" style={{ width: `${leaveStats?.totalBalance ? Math.min(((leaveStats?.usedThisYear ?? 0) / leaveStats.totalBalance) * 100, 100) : 0}%` }}></div>
             </div>
           </div>
         </div>

@@ -5,12 +5,13 @@ const adminAuth = require("../middleware/auth").adminAuth;
 const Leave = require("../models/Leave");
 const User = require("../models/User");
 const { sendEmail, leaveRequestEmail, leaveStatusEmail } = require("../utils/sendEmail");
-const { getSheetLeaveCounts } = require("../utils/sheetLeaves");
+const { getSheetLeaveCounts, getSheetLeaveForUser } = require("../utils/sheetLeaves");
 
 const CASUAL_LEAVE_PER_MONTH = 1.5; // 1 full day + 1 half day per month
 const CASUAL_LEAVE_PER_YEAR = CASUAL_LEAVE_PER_MONTH * 12; // 18 days per year
 
 function calculateLeaveDays(doc) {
+  if (doc.isShortBreak) return 0;
   if (doc.isHalfDay) return 0.5;
   const start = new Date(doc.startDate);
   const end = new Date(doc.endDate);
@@ -34,6 +35,10 @@ function formatLeave(leave, includeUser = false) {
     days,
     isHalfDay: !!doc.isHalfDay,
     halfDaySession: doc.halfDaySession || null,
+    isShortBreak: !!doc.isShortBreak,
+    breakHours: doc.breakHours || null,
+    breakFromTime: doc.breakFromTime || "",
+    breakToTime: doc.breakToTime || "",
     createdAt: doc.createdAt,
   };
   if (doc.adminNote) out.adminNote = doc.adminNote;
@@ -53,7 +58,7 @@ router.post("/", auth, async (req, res) => {
     if (!userId) {
       return res.status(401).json({ msg: "User not found in token" });
     }
-    const { type, startDate, endDate, reason, isHalfDay, halfDaySession, document: doc, documentName } = req.body;
+    const { type, startDate, endDate, reason, isHalfDay, halfDaySession, isShortBreak, breakHours, breakFromTime, breakToTime, document: doc, documentName } = req.body;
     if (!startDate || !endDate) {
       return res.status(400).json({ msg: "Start date and end date are required" });
     }
@@ -65,6 +70,11 @@ router.post("/", auth, async (req, res) => {
     if (end < start) {
       return res.status(400).json({ msg: "End date must be on or after start date" });
     }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (start < today) {
+      return res.status(400).json({ msg: "Cannot request leave for past dates" });
+    }
     if (isHalfDay) {
       if (start.toISOString().slice(0, 10) !== end.toISOString().slice(0, 10)) {
         return res.status(400).json({ msg: "Half-day leave must have the same start and end date" });
@@ -73,6 +83,9 @@ router.post("/", auth, async (req, res) => {
         return res.status(400).json({ msg: "Half-day session must be 'first_half' or 'second_half'" });
       }
     }
+    if (isShortBreak && (!breakHours || breakHours < 1 || breakHours > 3)) {
+      return res.status(400).json({ msg: "Break duration must be 1, 2, or 3 hours" });
+    }
     const leave = await Leave.create({
       user: userId,
       type: type || "casual",
@@ -80,8 +93,12 @@ router.post("/", auth, async (req, res) => {
       endDate: end,
       reason: reason || "",
       status: "pending",
-      isHalfDay: !!isHalfDay,
-      halfDaySession: isHalfDay ? halfDaySession : null,
+      isHalfDay: !!isHalfDay && !isShortBreak,
+      halfDaySession: isHalfDay && !isShortBreak ? halfDaySession : null,
+      isShortBreak: !!isShortBreak,
+      breakHours: isShortBreak ? breakHours : null,
+      breakFromTime: isShortBreak ? (breakFromTime || "") : "",
+      breakToTime: isShortBreak ? (breakToTime || "") : "",
       document: doc || "",
       documentName: documentName || "",
     });
@@ -126,6 +143,7 @@ router.get("/my", auth, async (req, res) => {
       .limit(100)
       .lean();
     const formatted = leaves.map((l) => formatLeave(l));
+    
     res.json(formatted);
   } catch (error) {
     console.error("My leaves error:", error);
@@ -158,13 +176,10 @@ router.get("/my/stats", auth, async (req, res) => {
       usedCasualDays += calculateLeaveDays(l);
     }
 
-    // Add leaves from Google Sheet
+    // Add leaves from Google Sheet (match by full name, fallback to first name)
     try {
-      const sheetLeaves = await getSheetLeaveCounts();
-      const firstName = (currentUser?.name || "").split(" ")[0].toLowerCase();
-      if (firstName && sheetLeaves[firstName]) {
-        usedCasualDays += sheetLeaves[firstName];
-      }
+      const sheetDays = await getSheetLeaveForUser(currentUser?.name || "");
+      usedCasualDays += sheetDays;
     } catch (err) {
       console.error("Sheet leave fetch error:", err.message);
     }
@@ -219,6 +234,32 @@ router.get("/my/stats", auth, async (req, res) => {
   }
 });
 
+// Team calendar: all approved & pending leaves for a given month
+router.get("/team-calendar", auth, async (req, res) => {
+  try {
+    const { year, month } = req.query; // month is 1-based
+    const y = parseInt(year) || new Date().getFullYear();
+    const m = parseInt(month) || new Date().getMonth() + 1;
+    const startOfMonth = new Date(y, m - 1, 1);
+    const endOfMonth = new Date(y, m, 0, 23, 59, 59, 999);
+
+    const leaves = await Leave.find({
+      status: { $in: ["approved", "pending"] },
+      startDate: { $lte: endOfMonth },
+      endDate: { $gte: startOfMonth },
+    })
+      .populate("user", "name email")
+      .sort({ startDate: 1 })
+      .lean();
+
+    const formatted = leaves.map((l) => formatLeave(l, true));
+    res.json(formatted);
+  } catch (error) {
+    console.error("Team calendar error:", error);
+    res.status(500).json({ msg: "Failed to fetch team calendar data" });
+  }
+});
+
 router.get("/on-leave-today", auth, async (req, res) => {
   try {
     const now = new Date();
@@ -239,6 +280,29 @@ router.get("/on-leave-today", auth, async (req, res) => {
   } catch (error) {
     console.error("On leave today error:", error);
     res.status(500).json({ msg: "Failed to fetch team on leave" });
+  }
+});
+
+// Upcoming leaves: approved leaves starting from today onward
+router.get("/upcoming", auth, async (req, res) => {
+  try {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+
+    const leaves = await Leave.find({
+      status: { $in: ["approved", "pending"] },
+      endDate: { $gte: startOfToday },
+    })
+      .populate("user", "name email profilePic")
+      .sort({ startDate: 1 })
+      .limit(10)
+      .lean();
+
+    const formatted = leaves.map((l) => formatLeave(l, true));
+    res.json(formatted);
+  } catch (error) {
+    console.error("Upcoming leaves error:", error);
+    res.status(500).json({ msg: "Failed to fetch upcoming leaves" });
   }
 });
 

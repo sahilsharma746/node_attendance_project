@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../css/Organizations.css';
 
@@ -7,8 +8,10 @@ const API_BASE = process.env.REACT_APP_API_URL;
 
 const Organizations = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [onLeaveToday, setOnLeaveToday] = useState([]);
+  const [upcomingLeaves, setUpcomingLeaves] = useState([]);
   const [inOffice, setInOffice] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
@@ -27,6 +30,10 @@ const Organizations = () => {
       setInOffice(Array.isArray(officeRes.data) ? officeRes.data : []);
     } catch (err) { console.error('Team fetch error:', err); }
     finally { setLoading(false); }
+    // Fetch upcoming leaves in background (non-blocking)
+    axios.get(`${API_BASE}/api/leave/upcoming`)
+      .then(res => setUpcomingLeaves(Array.isArray(res.data) ? res.data : []))
+      .catch(() => {});
   }, [user]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -58,7 +65,7 @@ const Organizations = () => {
     return getStatus(u) === statusFilter;
   });
 
-  const upcomingLeaves = onLeaveToday.slice(0, 3);
+  const upcomingLeavesDisplay = upcomingLeaves.slice(0, 5);
 
   if (loading) return <div className="tm"><h1 className="tm-title">Team Availability Today</h1><p className="tm-subtitle">Loading...</p></div>;
 
@@ -70,7 +77,18 @@ const Organizations = () => {
           <p className="tm-subtitle">Real-time overview of your workforce status.</p>
         </div>
         <div className="tm-header-actions">
-          <button className="tm-btn-outline">
+          <button className="tm-btn-outline" onClick={() => {
+            const rows = [['Name', 'Role', 'Status']];
+            filteredUsers.forEach(u => {
+              rows.push([u.name, u.role || 'Employee', getStatus(u)]);
+            });
+            const csv = rows.map(r => r.join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'team-report.csv'; a.click();
+            URL.revokeObjectURL(url);
+          }}>
             <span className="material-symbols-outlined" style={{fontSize:18}}>download</span>
             Export Report
           </button>
@@ -98,11 +116,11 @@ const Organizations = () => {
               <h2 className="tm-card-title tm-card-title-sm">Upcoming Leaves</h2>
               <span className="material-symbols-outlined tm-icon-muted">calendar_month</span>
             </div>
-            {upcomingLeaves.length === 0 ? (
+            {upcomingLeavesDisplay.length === 0 ? (
               <p className="tm-empty-text">No upcoming leaves</p>
             ) : (
               <div className="tm-upcoming-list">
-                {upcomingLeaves.map(l => (
+                {upcomingLeavesDisplay.map(l => (
                   <div key={l._id} className="tm-upcoming-item">
                     <div className="tm-upcoming-avatar">
                       {l.user?.profilePic ? <img src={l.user.profilePic} alt="" /> : getInitials(l.user?.name)}
@@ -116,7 +134,7 @@ const Organizations = () => {
                 ))}
               </div>
             )}
-            <button className="tm-view-all-btn">View All Schedule</button>
+            <button className="tm-view-all-btn" onClick={() => navigate('/dashboard/attendance-sheet')}>View All Schedule</button>
           </div>
         </div>
 

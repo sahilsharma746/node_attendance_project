@@ -45,7 +45,9 @@ async function getSheetLeaveCounts() {
   });
 
   // employeeName (lowercase first name) -> total leave days
+  // Also track full names for more precise matching
   const leaveCounts = {};
+  const leaveCountsByFullName = {};
 
   for (const tab of tabsToFetch) {
     try {
@@ -72,6 +74,8 @@ async function getSheetLeaveCounts() {
 
         if (leaveCount > 0) {
           leaveCounts[firstName] = (leaveCounts[firstName] || 0) + leaveCount;
+          const fullNameLower = fullName.toLowerCase();
+          leaveCountsByFullName[fullNameLower] = (leaveCountsByFullName[fullNameLower] || 0) + leaveCount;
         }
       });
     } catch (err) {
@@ -79,8 +83,24 @@ async function getSheetLeaveCounts() {
     }
   }
 
-  _cache = { data: leaveCounts, ts: Date.now() };
+  _cache = { data: leaveCounts, byFullName: leaveCountsByFullName, ts: Date.now() };
   return leaveCounts;
 }
 
-module.exports = { getSheetLeaveCounts };
+async function getSheetLeaveForUser(fullName) {
+  await getSheetLeaveCounts(); // ensure cache is populated
+  const fullNameLower = (fullName || "").toLowerCase().trim();
+  const firstName = fullNameLower.split(" ")[0];
+
+  // Try full name match first (more precise)
+  if (_cache.byFullName && _cache.byFullName[fullNameLower]) {
+    return _cache.byFullName[fullNameLower];
+  }
+  // Fallback to first name match only if no full name match
+  if (_cache.data && _cache.data[firstName]) {
+    return _cache.data[firstName];
+  }
+  return 0;
+}
+
+module.exports = { getSheetLeaveCounts, getSheetLeaveForUser };
