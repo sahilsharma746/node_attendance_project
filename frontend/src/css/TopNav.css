@@ -166,4 +166,16 @@
   .topnav-username {
     display: none;
   }
+
+  .topnav-dropdown {
+    position: fixed;
+    top: 56px;
+    right: 8px;
+    left: 8px;
+    width: auto;
+  }
+
+  .help-dropdown {
+    width: auto;
+  }
 }
