@@ -1,4 +1,4 @@
-.cal { flex:1; padding:24px; width:100%; }
+.cal { flex:1; padding:24px; width:100%; box-sizing:border-box; overflow-x:hidden; }
 .cal-title { font-family:'Space Grotesk',sans-serif; font-size:32px; font-weight:600; line-height:1.2; letter-spacing:-0.01em; color:#1a1c1c; margin:0 0 4px; }
 .cal-subtitle { font-family:'Manrope',sans-serif; font-size:16px; color:#454557; margin:0; }
 .cal-header { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:40px; }
@@ -99,7 +99,7 @@
 @media (max-width:768px) {
   .cal { padding:12px; padding-top:76px; }
   .cal-title { font-size:24px; }
-  .cal-main { min-width:0; overflow-x:auto; }
+  .cal-main { min-width:0; overflow:hidden; width:100%; box-sizing:border-box; }
   .cal-nav { padding:12px; flex-wrap:wrap; gap:8px; }
   .cal-month-title { font-size:18px; }
   .cal-today-btn { padding:6px 10px; font-size:12px; }
