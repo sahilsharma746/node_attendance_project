@@ -96,4 +96,18 @@
 .cal-empty { font-family:'Manrope',sans-serif; font-size:14px; color:#767589; }
 
 @media (max-width:1024px) { .cal-layout { flex-direction:column; } .cal-sidebar { width:100%; } .cal-main { min-width:0; } }
-@media (max-width:768px) { .cal { padding:16px; padding-top:76px; } .cal-title { font-size:24px; } .cal-grid { grid-auto-rows:minmax(80px,auto); } .cal-event { font-size:10px; padding:1px 4px; } }
+@media (max-width:768px) {
+  .cal { padding:12px; padding-top:76px; }
+  .cal-title { font-size:24px; }
+  .cal-main { min-width:0; overflow-x:auto; }
+  .cal-nav { padding:12px; flex-wrap:wrap; gap:8px; }
+  .cal-month-title { font-size:18px; }
+  .cal-today-btn { padding:6px 10px; font-size:12px; }
+  .cal-arrow-btn { width:32px; height:32px; }
+  .cal-day-name { padding:8px 2px; font-size:11px; letter-spacing:0; }
+  .cal-grid { grid-auto-rows:minmax(60px,auto); }
+  .cal-cell { padding:4px 2px; }
+  .cal-day-num { font-size:12px; padding:2px; }
+  .cal-event { font-size:9px; padding:1px 3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cal-card-title { font-size:18px; }
+}

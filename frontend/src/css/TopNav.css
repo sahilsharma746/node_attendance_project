@@ -18,6 +18,7 @@
   align-items: center;
   gap: 16px;
   margin-left: auto;
+  overflow: visible;
 }
 
 .topnav-icon-btn {
@@ -81,7 +82,7 @@
 .topnav-notif-icon.update { color:#0e00b9; }
 .topnav-notif-icon.leave { color:#059669; }
 .topnav-notif-content { display:flex; flex-direction:column; gap:2px; min-width:0; }
-.topnav-notif-title { font-family:'Manrope',sans-serif; font-size:13px; font-weight:500; color:#1a1c1c; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.topnav-notif-title { font-family:'Manrope',sans-serif; font-size:13px; font-weight:500; color:#1a1c1c; word-break:break-word; white-space:normal; }
 .topnav-notif-time { font-family:'Manrope',sans-serif; font-size:11px; color:#94a3b8; }
 
 /* Help items */
@@ -161,21 +162,29 @@
   .topnav {
     padding: 12px 16px;
     padding-left: 56px;
+    overflow: visible;
   }
 
   .topnav-username {
     display: none;
   }
 
+  .topnav-dropdown-wrap {
+    position: static;
+  }
+
   .topnav-dropdown {
-    position: fixed;
-    top: 56px;
-    right: 8px;
-    left: 8px;
-    width: auto;
+    position: absolute;
+    top: 100%;
+    right: -16px;
+    left: auto;
+    width: calc(100vw - 16px);
+    max-width: 340px;
+    margin-top: 8px;
   }
 
   .help-dropdown {
-    width: auto;
+    width: calc(100vw - 16px);
+    max-width: 280px;
   }
 }
