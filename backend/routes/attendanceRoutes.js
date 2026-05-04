@@ -15,8 +15,7 @@ async function adminRecordsHandler(req, res) {
     const filter = {};
     if (userId) filter.user = userId;
     if (month !== undefined && year !== undefined) {
-      const start = new Date(Number(year), Number(month) - 1, 1);
-      const end = new Date(Number(year), Number(month), 0, 23, 59, 59, 999);
+      const { start, end } = getISTMonthRange(Number(month), Number(year));
       filter.date = { $gte: start, $lte: end };
     }
     const records = await Attendance.find(filter)
@@ -233,8 +232,7 @@ router.get("/my-summary", auth, async (req, res) => {
     const now = new Date();
     const month = Number(req.query.month) || now.getMonth() + 1;
     const year = Number(req.query.year) || now.getFullYear();
-    const start = new Date(year, month - 1, 1);
-    const end = new Date(year, month, 0, 23, 59, 59, 999);
+    const { start, end } = getISTMonthRange(month, year);
 
     const records = await Attendance.find({
       user: req.user.id,
@@ -244,12 +242,11 @@ router.get("/my-summary", auth, async (req, res) => {
 
     let daysPresent = records.length;
 
-    const weekStart = new Date(now);
-    weekStart.setDate(now.getDate() - now.getDay());
-    weekStart.setHours(0, 0, 0, 0);
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6);
-    weekEnd.setHours(23, 59, 59, 999);
+    // Week boundaries in IST
+    const istNow = getISTDateStart(now);
+    const dayOfWeek = istNow.getDay(); // 0=Sun
+    const weekStart = new Date(istNow.getTime() - dayOfWeek * 86400000);
+    const weekEnd = new Date(weekStart.getTime() + 6 * 86400000 + 86399999);
 
     const weekRecords = await Attendance.find({
       user: req.user.id,
@@ -312,8 +309,7 @@ router.get("/team-monthly", auth, async (req, res) => {
     const now = new Date();
     const month = Number(req.query.month) || now.getMonth() + 1;
     const year = Number(req.query.year) || now.getFullYear();
-    const start = new Date(year, month - 1, 1);
-    const end = new Date(year, month, 0, 23, 59, 59, 999);
+    const { start, end } = getISTMonthRange(month, year);
     const daysInMonth = new Date(year, month, 0).getDate();
 
     const [allUsers, records] = await Promise.all([
@@ -409,10 +405,10 @@ router.get("/analytics", auth, async (req, res) => {
     const monthlyData = [];
     for (let i = 5; i >= 0; i--) {
       const m = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const mEnd = new Date(m.getFullYear(), m.getMonth() + 1, 0, 23, 59, 59, 999);
+      const { start: mStart, end: mEnd } = getISTMonthRange(m.getMonth() + 1, m.getFullYear());
       const count = await Attendance.countDocuments({
         user: userId,
-        date: { $gte: m, $lte: mEnd },
+        date: { $gte: mStart, $lte: mEnd },
       });
       const workingDays = getWorkingDaysInMonth(m.getMonth() + 1, m.getFullYear());
       monthlyData.push({
@@ -463,8 +459,7 @@ router.get("/summary", adminAuth, async (req, res) => {
   try {
     const month = Number(req.query.month) || new Date().getMonth() + 1;
     const year = Number(req.query.year) || new Date().getFullYear();
-    const start = new Date(year, month - 1, 1);
-    const end = new Date(year, month, 0, 23, 59, 59, 999);
+    const { start, end } = getISTMonthRange(month, year);
 
     const totalWorkingDays = getWorkingDaysInMonth(month, year);
 
@@ -529,6 +524,14 @@ function getISTDateStart(now) {
   // Convert any date to IST "start of day" (midnight IST)
   const istStr = now.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" }); // YYYY-MM-DD
   return new Date(istStr + "T00:00:00+05:30");
+}
+
+function getISTMonthRange(month, year) {
+  // Returns start/end dates in IST for a given month
+  const start = new Date(`${year}-${String(month).padStart(2, '0')}-01T00:00:00+05:30`);
+  const lastDay = new Date(year, month, 0).getDate();
+  const end = new Date(`${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}T23:59:59.999+05:30`);
+  return { start, end };
 }
 
 function formatTime(date) {
