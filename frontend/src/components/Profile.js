@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../css/Profile.css';
 
-const API_BASE = process.env.REACT_APP_API_URL;
+const API_BASE = ( process.env.REACT_APP_API_URL || '' );
 
 const Profile = () => {
   const { user, updateProfile, logout } = useAuth();

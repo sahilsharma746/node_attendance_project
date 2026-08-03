@@ -7,7 +7,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import '../css/Analytics.css';
 
-const API = process.env.REACT_APP_API_URL + '/api/attendance';
+const API = ( process.env.REACT_APP_API_URL || '' ) + '/api/attendance';
 const BASE_CSV_URL = process.env.REACT_APP_SHEET_CSV_URL;
 
 const COLORS = ['#4f46e5', '#e5e7eb'];

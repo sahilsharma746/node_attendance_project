@@ -3,8 +3,8 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import '../css/SummaryCards.css';
 
-const ATTENDANCE_API = process.env.REACT_APP_API_URL + '/api/attendance';
-const LEAVE_API = process.env.REACT_APP_API_URL + '/api/leave';
+const ATTENDANCE_API = ( process.env.REACT_APP_API_URL || '' ) + '/api/attendance';
+const LEAVE_API = ( process.env.REACT_APP_API_URL || '' ) + '/api/leave';
 
 const SummaryCards = () => {
   const { user } = useAuth();

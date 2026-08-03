@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import '../css/Sidebar.css';
 
-const API_BASE = process.env.REACT_APP_API_URL;
+const API_BASE = ( process.env.REACT_APP_API_URL || '' );
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: 'dashboard', end: true },

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../css/Organizations.css';
 
-const API_BASE = process.env.REACT_APP_API_URL;
+const API_BASE = ( process.env.REACT_APP_API_URL || '' );
 
 const Organizations = () => {
   const { user } = useAuth();

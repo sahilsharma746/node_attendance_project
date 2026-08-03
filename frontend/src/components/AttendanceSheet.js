@@ -4,8 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import '../css/CalendarPage.css';
 
-const LEAVE_API = process.env.REACT_APP_API_URL + '/api/leave';
-const HOLIDAYS_API = process.env.REACT_APP_API_URL + '/api/holidays';
+const LEAVE_API = ( process.env.REACT_APP_API_URL || '' ) + '/api/leave';
+const HOLIDAYS_API = ( process.env.REACT_APP_API_URL || '' ) + '/api/holidays';
 
 const DAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 

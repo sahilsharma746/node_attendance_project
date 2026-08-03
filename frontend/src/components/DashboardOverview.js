@@ -4,10 +4,10 @@ import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import '../css/DashboardOverview.css';
 
-const ATTENDANCE_API = process.env.REACT_APP_API_URL + '/api/attendance';
-const LEAVE_API = process.env.REACT_APP_API_URL + '/api/leave';
-const HOLIDAYS_API = process.env.REACT_APP_API_URL + '/api/holidays';
-const UPDATES_API = process.env.REACT_APP_API_URL + '/api/updates';
+const ATTENDANCE_API = ( process.env.REACT_APP_API_URL || '' ) + '/api/attendance';
+const LEAVE_API = ( process.env.REACT_APP_API_URL || '' ) + '/api/leave';
+const HOLIDAYS_API = ( process.env.REACT_APP_API_URL || '' ) + '/api/holidays';
+const UPDATES_API = ( process.env.REACT_APP_API_URL || '' ) + '/api/updates';
 
 const DashboardOverview = () => {
   const { user } = useAuth();

@@ -4,8 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { NavLink, useNavigate } from 'react-router-dom';
 import '../css/TopNav.css';
 
-const UPDATES_API = process.env.REACT_APP_API_URL + '/api/updates';
-const LEAVE_API = process.env.REACT_APP_API_URL + '/api/leave';
+const UPDATES_API = ( process.env.REACT_APP_API_URL || '' ) + '/api/updates';
+const LEAVE_API = ( process.env.REACT_APP_API_URL || '' ) + '/api/leave';
 
 const TopNav = () => {
   const { user } = useAuth();

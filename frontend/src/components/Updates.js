@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import '../css/Updates.css';
 
-const UPDATES_API = process.env.REACT_APP_API_URL + '/api/updates';
+const UPDATES_API = ( process.env.REACT_APP_API_URL || '' ) + '/api/updates';
 
 const Updates = () => {
   const { user } = useAuth();

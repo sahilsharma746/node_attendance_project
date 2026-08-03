@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import '../css/LeaveRequest.css';
 
-const LEAVE_API = process.env.REACT_APP_API_URL + '/api/leave';
+const LEAVE_API = ( process.env.REACT_APP_API_URL || '' ) + '/api/leave';
 
 const LeaveRequest = () => {
   const { user } = useAuth();

@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import '../../css/admin/AdminAttendance.css';
 
-const API_BASE = process.env.REACT_APP_API_URL + '/api/attendance';
-const AUTH_BASE = process.env.REACT_APP_API_URL + '/api/auth';
+const API_BASE = ( process.env.REACT_APP_API_URL || '' ) + '/api/attendance';
+const AUTH_BASE = ( process.env.REACT_APP_API_URL || '' ) + '/api/auth';
 
 
 function timeToInput(dateStrOrDate) {

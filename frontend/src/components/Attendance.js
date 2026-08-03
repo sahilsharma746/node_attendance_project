@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import '../css/Attendance.css';
 
-const API_BASE = process.env.REACT_APP_API_URL + '/api/attendance';
+const API_BASE = ( process.env.REACT_APP_API_URL || '' ) + '/api/attendance';
 
 const Attendance = () => {
   const { user } = useAuth();
