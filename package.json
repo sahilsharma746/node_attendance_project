@@ -1,0 +1,9 @@
+{
+  "name": "node-attendance-project",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "postinstall": "cd backend && npm install && cd ../frontend && npm install",
+    "build": "cd frontend && npm run build"
+  }
+}
