@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const connectDB = require("../backend/config/db");
-require("dotenv").config({ path: "./backend/.env" });
+const mongoose = require("mongoose");
 
 const app = express();
 
@@ -15,7 +14,22 @@ app.use(cors({
   credentials: true,
 }));
 
-connectDB();
+let dbConnected = false;
+async function ensureDB() {
+  if (dbConnected || mongoose.connection.readyState === 1) {
+    dbConnected = true;
+    return;
+  }
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    dbConnected = true;
+    console.log("MongoDB connected");
+  } catch (err) {
+    console.error("MongoDB connection error:", err.message);
+  }
+}
+
+ensureDB();
 
 app.use("/api/auth", require("../backend/routes/authRoutes"));
 app.use("/api/attendance", require("../backend/routes/attendanceRoutes"));
@@ -24,7 +38,7 @@ app.use("/api/holidays", require("../backend/routes/holidayRoutes"));
 app.use("/api/updates", require("../backend/routes/updateRoutes"));
 
 app.get("/api/health", (req, res) => {
-  res.json({ status: "OK", message: "Server is running" });
+  res.json({ status: "OK", db: mongoose.connection.readyState === 1 ? "connected" : "disconnected" });
 });
 
 module.exports = app;
