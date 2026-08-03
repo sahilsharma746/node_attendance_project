@@ -219,7 +219,7 @@ const DashboardOverview = () => {
             <span className="leave-hero-num">{leaveStats?.remaining ?? 0}</span>
             <span className="leave-hero-label">days remaining</span>
             <p className="leave-hero-detail">
-              {leaveStats?.usedThisYear ?? 0} used out of {leaveStats?.entitledSoFar ?? 0} earned ({leaveStats?.totalBalance ?? 18} annual)
+              {leaveStats?.usedThisYear ?? 0} used out of {leaveStats?.entitledSoFar ?? 0} earned ({leaveStats?.totalBalance ?? 9} half-yearly)
             </p>
             <div className="leave-hero-bar">
               <div className="leave-hero-bar-fill" style={{ width: `${leaveStats?.totalBalance ? Math.min(((leaveStats?.usedThisYear ?? 0) / leaveStats.totalBalance) * 100, 100) : 0}%` }}></div>

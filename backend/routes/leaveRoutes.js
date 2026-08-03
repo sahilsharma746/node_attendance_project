@@ -184,45 +184,30 @@ router.get("/my/stats", auth, async (req, res) => {
       console.error("Sheet leave fetch error:", err.message);
     }
 
-    // Casual leave with expiry logic:
-    // Each month grants CASUAL_LEAVE_PER_MONTH leaves.
-    // Unused leaves expire after 6 months (e.g., Jan leaves expire at end of July).
-    // Used leaves are deducted FIFO (oldest allocation first).
-    const EXPIRY_MONTHS = 6;
-    let remainingUsed = usedCasualDays;
-    let available = 0;
-    let expired = 0;
+    // Half-yearly reset logic:
+    // H1 (Jan-Jun): leaves accumulate, all expire at end of June.
+    // H2 (Jul-Dec): leaves accumulate, all expire at end of December.
+    // Used leaves are counted within the current half only.
+    const isH2 = currentMonth >= 7;
+    const halfStart = isH2 ? 7 : 1;
+    const monthsInHalf = currentMonth - halfStart + 1;
 
-    for (let m = 1; m <= currentMonth; m++) {
-      let allocation = CASUAL_LEAVE_PER_MONTH;
+    // Count used leaves in current half only
+    const halfStartDate = new Date(now.getFullYear(), halfStart - 1, 1);
+    const usedInHalf = approvedCasual
+      .filter(l => new Date(l.startDate) >= halfStartDate)
+      .reduce((sum, l) => sum + calculateLeaveDays(l), 0);
 
-      // Deduct used leaves from oldest allocation first (FIFO)
-      const deduct = Math.min(remainingUsed, allocation);
-      remainingUsed -= deduct;
-      allocation -= deduct;
-
-      // Check if this month's remaining unused leaves have expired
-      const isExpired = currentMonth > m + EXPIRY_MONTHS;
-      if (isExpired) {
-        expired += allocation; // unused portion is lost
-      } else {
-        available += allocation;
-      }
-    }
-
-    // entitledSoFar = total non-expired leaves (before usage)
-    let entitledSoFar = 0;
-    for (let m = 1; m <= currentMonth; m++) {
-      if (currentMonth <= m + EXPIRY_MONTHS) {
-        entitledSoFar += CASUAL_LEAVE_PER_MONTH;
-      }
-    }
+    // Add sheet leaves (already counted in usedCasualDays for full year)
+    const entitledSoFar = monthsInHalf * CASUAL_LEAVE_PER_MONTH;
+    const available = Math.max(0, entitledSoFar - usedInHalf);
+    const expired = (halfStart - 1) * CASUAL_LEAVE_PER_MONTH;
 
     res.json({
-      totalBalance: CASUAL_LEAVE_PER_YEAR,
+      totalBalance: 9,
       perMonth: CASUAL_LEAVE_PER_MONTH,
       entitledSoFar,
-      usedThisYear: usedCasualDays,
+      usedThisYear: usedInHalf,
       remaining: available,
       expired,
       pendingCount,
