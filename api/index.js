@@ -28,7 +28,7 @@ async function ensureDB() {
     return;
   }
   try {
-    await mongoose.connect(uri);
+    await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
     dbConnected = true;
     dbError = null;
     console.log("MongoDB connected");
@@ -47,12 +47,17 @@ app.use("/api/holidays", require("../backend/routes/holidayRoutes"));
 app.use("/api/updates", require("../backend/routes/updateRoutes"));
 
 app.get("/api/health", async (req, res) => {
-  if (mongoose.connection.readyState !== 1) await ensureDB();
+  if (mongoose.connection.readyState !== 1) {
+    await ensureDB();
+  }
+  const uri = process.env.MONGO_URI || "";
   res.json({
     status: "OK",
     db: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    readyState: mongoose.connection.readyState,
     dbError: dbError || null,
-    hasMongoURI: !!process.env.MONGO_URI,
+    uriPrefix: uri.substring(0, 20),
+    uriLen: uri.length,
   });
 });
 
