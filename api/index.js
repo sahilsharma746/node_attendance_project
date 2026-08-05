@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const mongoose = require("mongoose");
+const connectDB = require("../backend/config/db");
 
 const app = express();
 
@@ -14,35 +14,19 @@ app.use(cors({
   credentials: true,
 }));
 
-let dbError = null;
-let dbConnected = false;
-async function ensureDB() {
-  if (dbConnected || mongoose.connection.readyState === 1) {
-    dbConnected = true;
-    return;
-  }
-  const uri = process.env.MONGO_URI;
-  if (!uri) {
-    dbError = "MONGO_URI env var is not set";
-    console.error("MongoDB: MONGO_URI env var is not set");
-    return;
-  }
-  try {
-    await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
-    dbConnected = true;
-    dbError = null;
-    console.log("MongoDB connected");
-  } catch (err) {
-    dbError = err.message;
-    console.error("MongoDB connection error:", err.message);
-  }
-}
-
-const dbReady = ensureDB();
+let dbReady = connectDB().catch(err => {
+  console.error("Initial DB connection failed:", err.message);
+});
 
 app.use(async (req, res, next) => {
-  await dbReady;
-  if (mongoose.connection.readyState !== 1) await ensureDB();
+  const mongoose = require("mongoose");
+  if (mongoose.connection.readyState !== 1) {
+    try {
+      await connectDB();
+    } catch (err) {
+      return res.status(503).json({ msg: "Database unavailable", error: err.message });
+    }
+  }
   next();
 });
 
@@ -52,18 +36,11 @@ app.use("/api/leave", require("../backend/routes/leaveRoutes"));
 app.use("/api/holidays", require("../backend/routes/holidayRoutes"));
 app.use("/api/updates", require("../backend/routes/updateRoutes"));
 
-app.get("/api/health", async (req, res) => {
-  if (mongoose.connection.readyState !== 1) {
-    await ensureDB();
-  }
-  const uri = process.env.MONGO_URI || "";
+app.get("/api/health", (req, res) => {
+  const mongoose = require("mongoose");
   res.json({
     status: "OK",
     db: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
-    readyState: mongoose.connection.readyState,
-    dbError: dbError || null,
-    uriPrefix: uri.substring(0, 20),
-    uriLen: uri.length,
   });
 });
 
