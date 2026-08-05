@@ -38,7 +38,13 @@ async function ensureDB() {
   }
 }
 
-ensureDB();
+const dbReady = ensureDB();
+
+app.use(async (req, res, next) => {
+  await dbReady;
+  if (mongoose.connection.readyState !== 1) await ensureDB();
+  next();
+});
 
 app.use("/api/auth", require("../backend/routes/authRoutes"));
 app.use("/api/attendance", require("../backend/routes/attendanceRoutes"));
