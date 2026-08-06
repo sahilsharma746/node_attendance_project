@@ -2,5 +2,11 @@
   "outputDirectory": "frontend/build",
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api" }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/auto-checkout",
+      "schedule": "30 13 * * *"
+    }
   ]
 }
